@@ -1,0 +1,117 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+body, html {
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero {
+  height: 100vh;
+  background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b') no-repeat center center/cover;
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3em;
+  margin-bottom: 10px;
+}
+
+p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+}
+
+.form-box {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 25px 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 400px;
+}
+
+input {
+  padding: 12px;
+  width: 100%;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+button {
+  padding: 12px;
+  width: 100%;
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+button:hover {
+  background-color: #388E3C;
+}
+
+#status {
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: #ffd;
+}
+.role-prompt {
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  font-weight: 600;
+  color: #ffd;
+}
+
+.role-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.role-buttons button {
+  flex: 1;
+  padding: 12px;
+  font-size: 1em;
+  font-weight: bold;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.role-buttons button:hover {
+  background-color: #388e3c;
+}
