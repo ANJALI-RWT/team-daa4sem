@@ -1,5 +1,3 @@
-// location.js
-
 function registerRole(role) {
   const formContainer = document.getElementById('dynamic-form');
   let formHTML = '';
@@ -32,19 +30,21 @@ function registerRole(role) {
   // Auto-fetch location
   getLocation();
 
-  const API_BASE_URL = window.location.hostname === "localhost"
+  // ✅ Dynamic API Base URL (local or production)
+  const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
     ? "http://localhost:5000"
     : "https://team-daa4sem.onrender.com";
 
   const formId = role === 'collector' ? 'collector-form' : 'citizen-form';
   const form = document.getElementById(formId);
-  
+
   form.addEventListener('submit', async function(event) {
     event.preventDefault();
 
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
+    // ✅ Correct API endpoint based on role
     const url = role === 'collector'
       ? `${API_BASE_URL}/api/register/collector`
       : `${API_BASE_URL}/api/register/user`;
