@@ -1,3 +1,5 @@
+// location.js
+
 function registerRole(role) {
   const formContainer = document.getElementById('dynamic-form');
   let formHTML = '';
@@ -30,10 +32,9 @@ function registerRole(role) {
   // Auto-fetch location
   getLocation();
 
-  // Dynamic backend URL: Use localhost in dev, real URL in production
   const API_BASE_URL = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://your-production-backend-url.com";  // <-- Replace with your deployed backend URL
+    : "https://team-daa4sem.onrender.com";
 
   const formId = role === 'collector' ? 'collector-form' : 'citizen-form';
   const form = document.getElementById(formId);
@@ -44,7 +45,6 @@ function registerRole(role) {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-    // Compose full API URL
     const url = role === 'collector'
       ? `${API_BASE_URL}/api/register/collector`
       : `${API_BASE_URL}/api/register/user`;
@@ -56,7 +56,6 @@ function registerRole(role) {
         body: JSON.stringify(data)
       });
 
-      // Handle possible empty or non-JSON responses gracefully
       let result;
       const text = await response.text();
       try {

@@ -10,17 +10,14 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Built-in JSON parser
+app.use(express.json()); // Parse incoming JSON requests
 
-// Connect to MongoDB Atlas
+// Connect to MongoDB Atlas (without deprecated options)
 const mongoURI = process.env.MONGODB_URI;
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect(mongoURI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // Define Mongoose Schemas and Models
 const userSchema = new mongoose.Schema({
@@ -41,7 +38,7 @@ const Collector = mongoose.model('Collector', collectorSchema);
 
 // Routes
 
-// Root route (optional)
+// Root route
 app.get('/', (req, res) => {
   res.send('Smart Waste Management Backend is running.');
 });
