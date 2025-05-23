@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EcoAI Waste Management</title>
   <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
   <aside class="sidebar">
@@ -25,24 +25,22 @@
     <section id="user" class="card">
       <h1>User App</h1>
       <p>Scan barcode or upload waste image:</p>
-      <input type="text" placeholder="Scan Barcode..." class="input" />
-      <input type="file" accept="image/*" class="input" />
-      <button class="btn">Get Recycling Suggestion</button>
-      <div class="result-card">Suggestion will appear here.</div>
+      <input type="text" id="barcodeInput" placeholder="Scan Barcode..." class="input" />
+      <input type="file" id="uploadInput" accept="image/*" class="input" />
+      <button class="btn" id="suggestBtn">Get Recycling Suggestion</button>
+      <div class="result-card" id="suggestionResult">Suggestion will appear here.</div>
     </section>
 
     <section id="bins" class="card">
       <h1>Smart Bins</h1>
-      <div class="bin-grid" id="binData">
-        <!-- Bins will be populated here by JS -->
-      </div>
+      <div class="bin-grid" id="binData"></div>
     </section>
 
     <section id="ai" class="card">
       <h1>AI Waste Detection</h1>
       <p>Upload image for AI-based waste classification:</p>
       <input type="file" accept="image/*" id="aiImageInput" class="input" />
-      <button class="btn" onclick="classifyWaste()">Analyze Image</button>
+      <button class="btn" id="analyzeBtn">Analyze Image</button>
       <div class="result-card" id="aiResult">AI Prediction: Organic Waste</div>
     </section>
 
@@ -63,20 +61,20 @@
             <th>Status</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="adminTableBody">
           <tr>
             <td>Zone A</td>
             <td>#102</td>
             <td>0%</td>
             <td>2025-05-16</td>
-            <td class="Empty">Needs Pickup</td>
+            <td class="status critical">Needs Pickup</td>
           </tr>
           <tr>
             <td>Zone B</td>
             <td>#203</td>
             <td>0%</td>
             <td>2025-05-15</td>
-            <td class="Empty">Okay</td>
+            <td class="status ok">Okay</td>
           </tr>
         </tbody>
       </table>

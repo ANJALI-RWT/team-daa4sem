@@ -335,7 +335,8 @@ th {
 }
 
 #sendBtn:hover {
-  background-color: #00796b;
+  background-color: #004d40;
+  
 }
 
 /* Individual message bubbles */
