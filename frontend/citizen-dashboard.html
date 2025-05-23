@@ -33,26 +33,17 @@
 
     <section id="bins" class="card">
       <h1>Smart Bins</h1>
-      <div class="bin-grid">
-        <div class="bin">
-          <h3>Bin 1</h3>
-          <div class="bar" style="height: 80%;"></div>
-          <p>0 Full</p>
-        </div>
-        <div class="bin">
-          <h3>Bin 2</h3>
-          <div class="bar" style="height: 45%;"></div>
-          <p>0 Full</p>
-        </div>
+      <div class="bin-grid" id="binData">
+        <!-- Bins will be populated here by JS -->
       </div>
     </section>
 
     <section id="ai" class="card">
       <h1>AI Waste Detection</h1>
       <p>Upload image for AI-based waste classification:</p>
-      <input type="file" accept="image/*" class="input" />
-      <button class="btn">Analyze Image</button>
-      <div class="result-card">AI Prediction: Organic Waste</div>
+      <input type="file" accept="image/*" id="aiImageInput" class="input" />
+      <button class="btn" onclick="classifyWaste()">Analyze Image</button>
+      <div class="result-card" id="aiResult">AI Prediction: Organic Waste</div>
     </section>
 
     <section id="trucks" class="card">
@@ -91,5 +82,7 @@
       </table>
     </section>
   </main>
+
+  <script src="dashboard.js"></script>
 </body>
 </html>

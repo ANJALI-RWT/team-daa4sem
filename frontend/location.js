@@ -68,66 +68,43 @@ function registerRole(role) {
         body: JSON.stringify(data)
       });
 
-      const rawText = await response.text();
-      const result = rawText ? safeJsonParse(rawText) : {};
+      const result = await response.json();
+      const statusDiv = document.getElementById('status');
 
-      const status = document.getElementById('status');
       if (response.ok) {
-        status.textContent = `✅ Registered successfully as ${role}`;
+        statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
         form.reset();
-
-        if (role === 'citizen') {
-          window.location.href = 'citizen-dashboard.html';
-        } else if (role === 'collector') {
-          window.location.href = 'collector-dashboard.html';
-        }
       } else {
-        status.textContent = `❌ ${result.error || 'Registration failed'}`;
+        statusDiv.style.color = 'red';
+        statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      document.getElementById('status').textContent = '❌ Network or server error.';
+      alert('Network error: ' + err.message);
     }
   });
 }
 
 function getLocation() {
-  const locationInput = document.getElementById('location-input');
-  if (!locationInput) return;
-
+  const locInput = document.getElementById('location-input');
   if (!navigator.geolocation) {
-    locationInput.value = 'Geolocation not supported.';
+    if (locInput) locInput.value = 'Geolocation is not supported by your browser';
     return;
   }
 
+  if (locInput) locInput.value = 'Detecting location...';
+
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      const lat = position.coords.latitude.toFixed(5);
-      const lon = position.coords.longitude.toFixed(5);
-      locationInput.value = `${lat}, ${lon}`;
-      console.log('📍 Location:', locationInput.value);
+      const { latitude, longitude } = position.coords;
+      if (locInput) locInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
     },
     (error) => {
-      const messages = {
-        1: 'Permission denied for Geolocation.',
-        2: 'Location unavailable.',
-        3: 'Location request timed out.'
-      };
-      locationInput.value = messages[error.code] || 'Unknown error occurred.';
-      console.error('Geolocation Error:', error.message);
+      if (locInput) locInput.value = `Error: ${error.message}`;
     },
     {
       enableHighAccuracy: true,
       timeout: 10000,
-      maximumAge: 0
+      maximumAge: 0,
     }
   );
-}
-
-function safeJsonParse(text) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return { error: text || 'Invalid JSON response' };
-  }
 }
