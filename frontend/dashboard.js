@@ -1,34 +1,22 @@
-// Simulate fetching bin data
-document.addEventListener("DOMContentLoaded", () => {
-  const binData = [
-    { id: "Bin A", level: 76 },
-    { id: "Bin B", level: 32 },
-  ];
-
-  const container = document.getElementById("binData");
-  binData.forEach(bin => {
-    const div = document.createElement("div");
-    div.className = "bin";
-    div.innerHTML = `
-      <h3>${bin.id}</h3>
-      <div class="bar" style="height: ${bin.level}%;"></div>
-      <p>${bin.level}% Full</p>
-    `;
-    container.appendChild(div);
-  });
-});
-
-// Simulate AI waste classification
-function classifyWaste() {
-  const result = document.getElementById("aiResult");
-  result.textContent = "Analyzing...";
-  setTimeout(() => {
-    result.textContent = "Prediction: Recyclable Plastic";
-    document.getElementById("recycleCount").textContent = 5;
-  }, 1000);
-}
-
+// dashboard.js
 function logout() {
   alert("Logged out!");
   window.location.href = "index.html";
 }
+
+function classifyWaste() {
+  const resultDiv = document.getElementById("aiResult");
+  resultDiv.textContent = "Classifying... (mock result: Recyclable)";
+  // Add API call or logic here
+}
+
+// Optional: simulate bin data
+window.addEventListener("DOMContentLoaded", () => {
+  const binData = document.getElementById("binData");
+  for (let i = 1; i <= 4; i++) {
+    const bin = document.createElement("div");
+    bin.className = "bin";
+    bin.innerHTML = `<h3>Bin ${i}</h3><div class="bar" style="height: ${Math.random() * 100}px;"></div>`;
+    binData.appendChild(bin);
+  }
+});

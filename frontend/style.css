@@ -1,3 +1,4 @@
+/* === GLOBAL BASE STYLES === */
 * {
   margin: 0;
   padding: 0;
@@ -7,11 +8,16 @@
 
 body, html {
   height: 100%;
-  overflow: hidden;
+  background-color: #f1f8f6;
+  color: #333;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
+/* === HERO SECTION === */
 .hero {
-  height: 100vh;
+  min-height: 100vh;
+  height: auto;
   background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b') no-repeat center center/cover;
   position: relative;
 }
@@ -34,6 +40,8 @@ body, html {
   align-items: center;
   padding: 30px;
   text-align: center;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 h1 {
@@ -54,32 +62,33 @@ p {
   backdrop-filter: blur(10px);
   width: 100%;
   max-width: 400px;
+  box-sizing: border-box;
 }
 
-input {
+input, .input {
   padding: 12px;
   width: 100%;
-  margin-bottom: 15px;
-  border: none;
-  border-radius: 5px;
+  margin: 10px 0 15px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
   font-size: 1em;
 }
 
-button {
+button, .btn {
   padding: 12px;
   width: 100%;
-  background-color: #4CAF50;
+  background-color: #00796b;
   border: none;
   color: white;
-  font-size: 1em;
   font-weight: bold;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin-top: 5px;
 }
 
-button:hover {
-  background-color: #388E3C;
+button:hover, .btn:hover {
+  background-color: #004d40;
 }
 
 #status {
@@ -87,6 +96,7 @@ button:hover {
   font-size: 0.9em;
   color: #ffd;
 }
+
 .role-prompt {
   font-size: 1.1em;
   margin-bottom: 20px;
@@ -115,7 +125,91 @@ button:hover {
 .role-buttons button:hover {
   background-color: #388e3c;
 }
-/* Styles for bin cards */
+
+/* === SIDEBAR === */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100%;
+  background-color: #004d40;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.logo, .sidebar h2 {
+  font-size: 1.8em;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  margin-bottom: 20px;
+}
+
+.sidebar a,
+.sidebar button {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1em;
+  font-weight: bold;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.sidebar a:hover,
+.sidebar button:hover {
+  color: #80cbc4;
+}
+
+/* === MAIN CONTENT AREA === */
+.content-with-sidebar {
+  margin-left: 240px;
+  padding: 40px 30px;
+  background-color: #e0f2f1;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 10px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card h1 {
+  margin-bottom: 15px;
+  color: #004d40;
+}
+
+.card p {
+  margin-bottom: 10px;
+}
+
+/* === RESULT CARD === */
+.result-card {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  color: #004d40;
+  border-left: 5px solid #00796b;
+  font-weight: 500;
+}
+
+/* === BIN SECTION === */
 .bin-grid {
   display: flex;
   gap: 20px;
@@ -144,4 +238,52 @@ button:hover {
   margin: 0 auto 10px auto;
   border-radius: 5px 5px 0 0;
   transition: height 0.3s ease;
+}
+
+/* === ADMIN TABLE === */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+th {
+  background-color: #b2dfdb;
+  color: #004d40;
+}
+
+.status.ok {
+  color: green;
+  font-weight: bold;
+}
+
+.status.critical {
+  color: red;
+  font-weight: bold;
+}
+
+/* === MAP PLACEHOLDER === */
+.map-placeholder {
+  background-color: #b2dfdb;
+  height: 200px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #004d40;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+/* === OPTIONAL CONTAINER === */
+.main-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
 }

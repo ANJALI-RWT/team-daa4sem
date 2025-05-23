@@ -1,48 +1,94 @@
-<!-- citizen-dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Citizen Dashboard | Smart Waste</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="dashboard.js" defer></script>
+  <title>EcoAI Waste Management</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <nav class="sidebar">
-    <h2>♻ EcoAI</h2>
-    <ul>
-      <li><a href="#bins">Smart Bins</a></li>
-      <li><a href="#ai">AI Waste Detection</a></li>
-      <li><a href="#trucks">Truck Routes</a></li>
-      <li><a href="#profile">My Activity</a></li>
-      <li><button onclick="logout()">🚪 Logout</button></li>
-    </ul>
-  </nav>
+  <aside class="sidebar">
+    <div class="logo">♻ EcoAI</div>
+    <nav>
+      <ul>
+        <li><a href="#user">📱 User App</a></li>
+        <li><a href="#bins">🗑 Smart Bins</a></li>
+        <li><a href="#ai">☁ AI System</a></li>
+        <li><a href="#trucks">🚛 Truck Routes</a></li>
+        <li><a href="#admin">📊 Admin Panel</a></li>
+      </ul>
+    </nav>
+  </aside>
 
-  <main class="content">
-    <section id="bins">
-      <h1>🗑 Bin Status</h1>
-      <div class="bin-grid" id="binData">
-        <!-- JS will inject bin levels -->
+  <main class="content-with-sidebar">
+    <section id="user" class="card">
+      <h1>User App</h1>
+      <p>Scan barcode or upload waste image:</p>
+      <input type="text" placeholder="Scan Barcode..." class="input" />
+      <input type="file" accept="image/*" class="input" />
+      <button class="btn">Get Recycling Suggestion</button>
+      <div class="result-card">Suggestion will appear here.</div>
+    </section>
+
+    <section id="bins" class="card">
+      <h1>Smart Bins</h1>
+      <div class="bin-grid">
+        <div class="bin">
+          <h3>Bin 1</h3>
+          <div class="bar" style="height: 80%;"></div>
+          <p>0 Full</p>
+        </div>
+        <div class="bin">
+          <h3>Bin 2</h3>
+          <div class="bar" style="height: 45%;"></div>
+          <p>0 Full</p>
+        </div>
       </div>
     </section>
 
-    <section id="ai">
-      <h1>🤖 AI Classification</h1>
-      <input type="file" accept="image/*" id="wasteImage" />
-      <button onclick="classifyWaste()">Analyze</button>
-      <div class="result-card" id="aiResult">Upload image to classify.</div>
+    <section id="ai" class="card">
+      <h1>AI Waste Detection</h1>
+      <p>Upload image for AI-based waste classification:</p>
+      <input type="file" accept="image/*" class="input" />
+      <button class="btn">Analyze Image</button>
+      <div class="result-card">AI Prediction: Organic Waste</div>
     </section>
 
-    <section id="trucks">
-      <h1>🚛 Nearby Routes</h1>
-      <div class="map-placeholder">[🗺 Real-time truck routing soon]</div>
+    <section id="trucks" class="card">
+      <h1>Truck Route Optimization</h1>
+      <div class="map-placeholder">🗺 Route Map Will Appear Here</div>
     </section>
 
-    <section id="profile">
-      <h1>👤 My Recycling Stats</h1>
-      <p>Recycled Items: <span id="recycleCount">0</span></p>
+    <section id="admin" class="card">
+      <h1>Admin Dashboard</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Zone</th>
+            <th>Bin ID</th>
+            <th>Fill Level</th>
+            <th>Last Collected</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Zone A</td>
+            <td>#102</td>
+            <td>0%</td>
+            <td>2025-05-16</td>
+            <td class="Empty">Needs Pickup</td>
+          </tr>
+          <tr>
+            <td>Zone B</td>
+            <td>#203</td>
+            <td>0%</td>
+            <td>2025-05-15</td>
+            <td class="Empty">Okay</td>
+          </tr>
+        </tbody>
+      </table>
     </section>
   </main>
 </body>

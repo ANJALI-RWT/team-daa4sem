@@ -4,7 +4,7 @@ function registerRole(role) {
 
   const commonFields = `
     <label>Username:<br><input type="text" name="username" required></label><br>
-    <label>Location:<br><input type="text" name="location" id="location-input" readonly required></label><br>
+    <label>Location:<br><input type="text" name="location" id="location-input" readonly required placeholder="Detecting location..."></label><br>
   `;
 
   if (role === 'collector') {
@@ -13,7 +13,7 @@ function registerRole(role) {
       <form id="collector-form">
         ${commonFields}
         <label>Truck Capacity (tons):<br><input type="number" name="truckCapacity" min="1" required></label><br>
-        <button type="submit">Register Collector</button>
+        <button type="submit" id="submit-btn">Register Collector</button>
       </form>
     `;
   } else if (role === 'citizen') {
@@ -23,7 +23,7 @@ function registerRole(role) {
         ${commonFields}
         <label>Bio Bin Capacity (kg):<br><input type="number" name="bioCapacity" min="0" required></label><br>
         <label>Non-Bio Bin Capacity (kg):<br><input type="number" name="nonBioCapacity" min="0" required></label><br>
-        <button type="submit">Register Citizen</button>
+        <button type="submit" id="submit-btn">Register Citizen</button>
       </form>
     `;
   }
@@ -34,7 +34,7 @@ function registerRole(role) {
   // Fetch location
   getLocation();
 
-  // Determine base API URL
+  // Determine API base URL
   const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
     : 'https://team-daa4sem.onrender.com';
@@ -44,6 +44,15 @@ function registerRole(role) {
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
+    const locationInput = document.getElementById('location-input');
+    const locationValue = locationInput.value;
+
+    // Prevent form submission if location is not valid
+    if (!locationValue || locationValue.includes('error') || locationValue.includes('not supported') || locationValue.includes('Detecting')) {
+      alert('📍 Please allow location access and wait for location to load.');
+      return;
+    }
 
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
@@ -67,7 +76,6 @@ function registerRole(role) {
         status.textContent = `✅ Registered successfully as ${role}`;
         form.reset();
 
-        // Redirect based on role
         if (role === 'citizen') {
           window.location.href = 'citizen-dashboard.html';
         } else if (role === 'collector') {
