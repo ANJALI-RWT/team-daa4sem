@@ -1,18 +1,22 @@
-require('dotenv').config(); // Load environment variables from .env
-console.log('Mongo URI loaded:', process.env.MONGODB_URI);
+# smart-waste-backend/app.py
+require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer'); // For handling file uploads
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Parse incoming JSON requests
+app.use(express.json());
 
-// Connect to MongoDB Atlas (without deprecated options)
+// Set up multer for file uploads
+const upload = multer({ dest: 'uploads/' }); // Temporary directory for uploaded images
+
+// Connect to MongoDB Atlas
 const mongoURI = process.env.MONGODB_URI;
 
 mongoose.connect(mongoURI)
@@ -36,7 +40,7 @@ const collectorSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Collector = mongoose.model('Collector', collectorSchema);
 
-// Routes
+// --- ROUTES ---
 
 // Root route
 app.get('/', (req, res) => {
@@ -49,39 +53,12 @@ app.post('/api/register/user', async (req, res) => {
     const { username, location, bioCapacity, nonBioCapacity } = req.body;
 
     if (!username || !location || bioCapacity == null || nonBioCapacity == null) {
-      return res.status(400).json({ error: 'Please provide all required fields.' });
+      return res.status(400).json({ message: 'All fields are required.' });
     }
 
     const newUser = new User({ username, location, bioCapacity, nonBioCapacity });
     await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User registered successfully!', user: newUser });
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Register Collector
-app.post('/api/register/collector', async (req, res) => {
-  try {
-    const { username, location, truckCapacity } = req.body;
-
-    if (!username || !location || truckCapacity == null) {
-      return res.status(400).json({ error: 'Please provide all required fields.' });
-    }
-
-    const newCollector = new Collector({ username, location, truckCapacity });
-    await newCollector.save();
-
-    res.status(201).json({ message: 'Collector registered successfully' });
-  } catch (error) {
-    console.error('Error registering collector:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+    res.status(
