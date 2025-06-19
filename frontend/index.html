@@ -1,102 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EcoAI Waste Management</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-  <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Waste Management - Join the Green Mission</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="location.js" defer></script>
 </head>
 <body>
-  <aside class="sidebar">
-    <div class="logo">♻ EcoAI</div>
-    <nav>
-      <ul>
-        <li><a href="#user">📱 User App</a></li>
-        <li><a href="#bins">🗑 Smart Bins</a></li>
-        <li><a href="#ai">☁ AI System</a></li>
-        <li><a href="#trucks">🚛 Truck Routes</a></li>
-        <li><a href="#admin">📊 Admin Panel</a></li>
-      </ul>
-    </nav>
-  </aside>
+    <main class="hero">
+        <div class="overlay"></div>
 
-  <main class="content-with-sidebar">
-    <section id="user" class="card">
-      <h1>User App</h1>
-      <p>Scan barcode or upload waste image:</p>
+        <section class="content">
+            <h1>🌱 Join the Green Mission</h1>
+            <p>Be part of a smarter, cleaner planet. Register your location and take action today.</p>
 
-      <div class="scanner-container">
-        <video id="barcodeScanner" style="width: 100%; height: auto; border: 1px solid #ccc;"></video>
-        <div id="barcodeResult" class="result-card">Scanned Barcode: None</div>
-        <button class="btn" id="startBarcodeScanBtn">Start Barcode Scan</button>
-        <button class="btn" id="stopBarcodeScanBtn" style="display: none;">Stop Barcode Scan</button>
-      </div>
+            <div class="form-box">
+                <p class="role-prompt">👉 Are you a...</p>
+                <div class="role-buttons">
+                    <button onclick="registerRole('citizen')">🚶 Citizen / User</button>
+                    <button onclick="registerRole('collector')">🚛 Waste Collector</button>
+                </div>
 
-      <hr style="margin: 20px 0;"> <div class="camera-container">
-        <video id="cameraFeed" style="width: 100%; height: auto; border: 1px solid #ccc;"></video>
-        <canvas id="cameraCanvas" style="display: none;"></canvas>
-        <input type="file" id="uploadInput" accept="image/*" class="input" />
-        <button class="btn" id="startCameraBtn">Open Camera</button>
-        <button class="btn" id="captureImageBtn" style="display: none;">Capture Image</button>
-        <button class="btn" id="stopCameraBtn" style="display: none;">Close Camera</button>
-      </div>
-      <button class="btn" id="classifyCapturedImageBtn" style="display: none;">Get Recycling Suggestion from Captured Image</button>
-      <div class="result-card" id="suggestionResult">Suggestion will appear here.</div>
+               <div id="dynamic-form"></div>
+               <div id="status" style="margin-top: 10px; color: green;"></div>
 
-    </section>
-
-    <section id="bins" class="card">
-      <h1>Smart Bins</h1>
-      <div class="bin-grid" id="binData"></div>
-    </section>
-
-    <section id="ai" class="card">
-      <h1>AI Waste Detection (Direct Upload for AI)</h1>
-      <p>Upload image for AI-based waste classification:</p>
-      <input type="file" accept="image/*" id="aiImageInput" class="input" />
-      <button class="btn" id="analyzeBtn">Analyze Image</button>
-      <div class="result-card" id="aiResult">AI Prediction: Organic Waste</div>
-    </section>
-
-    <section id="trucks" class="card">
-      <h1>Truck Route Optimization</h1>
-      <div class="map-placeholder">🗺 Route Map Will Appear Here</div>
-    </section>
-
-    <section id="admin" class="card">
-      <h1>Admin Dashboard</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Zone</th>
-            <th>Bin ID</th>
-            <th>Fill Level</th>
-            <th>Last Collected</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="adminTableBody">
-          <tr>
-            <td>Zone A</td>
-            <td>#102</td>
-            <td>0%</td>
-            <td>2025-05-16</td>
-            <td class="status critical">Needs Pickup</td>
-          </tr>
-          <tr>
-            <td>Zone B</td>
-            <td>#203</td>
-            <td>0%</td>
-            <td>2025-05-15</td>
-            <td class="status ok">Okay</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
-
-  <script src="dashboard.js"></script>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
