@@ -1,260 +1,446 @@
-/* General Styling */
-body {
-    font-family: 'Inter', sans-serif;
+/* smart-waste-frontend/style.css */
+
+/* === GLOBAL BASE STYLES === */
+* {
     margin: 0;
-    background-color: #f0f2f5;
-    display: flex;
-    min-height: 100vh;
-}
-
-.sidebar {
-    width: 250px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: fixed; /* Keep sidebar fixed */
-    height: 100%; /* Full height */
-    overflow-y: auto; /* Enable scrolling if content overflows */
-}
-
-.logo {
-    font-size: 1.8em;
-    font-weight: 700;
-    margin-bottom: 30px;
-    color: #2ecc71; /* Green accent */
-}
-
-.sidebar nav ul {
-    list-style: none;
     padding: 0;
-    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif; /* Changed from Segoe UI to Inter for consistency with HTML link */
 }
 
-.sidebar nav ul li {
-    margin-bottom: 15px;
-    width: 100%;
+body, html {
+    height: 100%;
+    background-color: #f0f2f5; /* Adjusted background color for a softer look */
+    color: #333;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex; /* Use flexbox for sidebar and main content */
 }
 
-.sidebar nav ul li a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 1.1em;
-    padding: 10px 15px;
-    display: block;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+/* === HERO SECTION (for index.html - no changes here, just keeping it) === */
+.hero {
+    min-height: 100vh;
+    height: auto;
+    background: url('https://images.unsplash.com/photo-1508264165352-258db2ebd59b') no-repeat center center/cover;
+    position: relative;
+    width: 100%; /* Ensure it takes full width */
 }
 
-.sidebar nav ul li a:hover {
-    background-color: #34495e;
+.overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
 }
 
-.content-with-sidebar {
-    margin-left: 250px; /* Offset content by sidebar width */
-    flex-grow: 1;
-    padding: 20px;
+.content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Space between sections */
-}
-
-.card {
-    background-color: #ffffff;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+    max-width: 1000px;
+    margin: 0 auto;
 }
 
 h1 {
-    color: #2c3e50;
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.8em;
-}
-
-h2 {
-    color: #34495e;
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.4em;
+    font-size: 3em;
+    margin-bottom: 10px;
 }
 
 p {
-    color: #555;
-    line-height: 1.6;
+    font-size: 1.2em;
+    margin-bottom: 30px;
 }
 
-.btn {
-    background-color: #2ecc71;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.form-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 25px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+input, .input {
+    padding: 12px;
+    width: 100%;
+    margin: 10px 0 15px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
     font-size: 1em;
-    transition: background-color 0.3s ease;
+}
+
+button, .btn {
+    padding: 12px 20px; /* Adjusted padding for better button appearance */
+    width: auto; /* Allow buttons to size based on content, not always 100% */
+    min-width: 120px; /* Minimum width for consistency */
+    background-color: #27ae60; /* Green button */
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Transition for background */
+    margin-top: 5px;
+    display: inline-block; /* For side-by-side buttons */
     margin-right: 10px; /* Space between buttons */
 }
 
-.btn:hover {
-    background-color: #27ae60;
+button:hover, .btn:hover {
+    background-color: #229a53; /* Darker green on hover */
 }
 
-.input {
-    width: calc(100% - 22px); /* Account for padding */
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box; /* Include padding in width */
-}
-
-.result-card {
-    background-color: #e8f5e9; /* Light green for success/info */
-    border: 1px solid #a5d6a7;
-    padding: 15px;
-    border-radius: 5px;
+#status {
     margin-top: 15px;
-    color: #388e3c;
-    font-weight: bold;
+    font-size: 0.9em;
+    color: #ffd;
 }
 
-/* Specific Styles for Scanner/Camera */
-.scanner-container, .camera-container {
+.role-prompt {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #ffd;
+}
+
+.role-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.role-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-size: 1em;
+    font-weight: bold;
+    background-color: #4caf50;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.role-buttons button:hover {
+    background-color: #388e3c;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 250px; /* Adjusted width */
+    height: 100%;
+    background-color: #2c3e50; /* Dark blue-gray */
+    color: #ecf0f1; /* Light gray */
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    box-sizing: border-box; /* Ensures padding is included in the width */
+    overflow-y: auto; /* Enable scrolling if content exceeds height */
+}
+
+.logo { /* Removed .sidebar h2 as it's not in the HTML */
+    font-size: 1.8em;
+    font-weight: 700; /* Adjusted font-weight */
+    text-align: center;
+    margin-bottom: 30px;
+    color: #27ae60; /* Green for logo */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0; /* Changed from padding-left: 0 */
+    margin: 0;
+}
+
+.sidebar li { /* Changed margin-bottom from 20px to 10px for tighter list */
+    margin-bottom: 10px;
+}
+
+.sidebar a { /* Combined with .sidebar button if applicable */
+    display: block; /* Make links block to fill LI */
+    padding: 10px 15px; /* Add padding for clickable area */
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 600; /* Adjusted font-weight */
+    border-radius: 5px; /* Rounded corners for links */
+    transition: background-color 0.3s ease;
+}
+
+.sidebar a:hover,
+.sidebar a.active { /* Added active state */
+    background-color: #34495e; /* Slightly lighter dark blue-gray on hover/active */
+}
+
+
+/* === MAIN CONTENT AREA === */
+.content-with-sidebar {
+    margin-left: 270px; /* Offset for fixed sidebar + some padding */
+    padding: 20px; /* General padding */
+    flex-grow: 1; /* Allow main content to take remaining space */
+    background-color: #f0f2f5; /* Consistent with body background */
+    height: 100vh; /* Fill remaining height */
+    overflow-y: auto; /* Allow scrolling for content */
+}
+
+.card {
+    background: white;
+    padding: 30px; /* Increased padding for better spacing */
+    border-radius: 10px;
+    margin-bottom: 20px; /* Adjusted margin-bottom */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
+}
+
+.card h1 {
+    margin-bottom: 20px; /* Increased margin */
+    color: #2c3e50; /* Darker heading color */
+    font-size: 2em; /* Larger heading */
+    border-bottom: 2px solid #27ae60; /* Green underline */
+    padding-bottom: 10px; /* Padding for underline */
+}
+
+.card p {
+    margin-bottom: 15px; /* Adjusted margin */
+}
+
+/* === RESULT CARD === */
+.result-card {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #e8f5e9; /* Light green background */
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    color: #2e7d32; /* Darker green text */
+    border-left: 5px solid #a5d6a7; /* Adjusted border color */
+    font-weight: 600; /* Bolder text */
+}
+
+/* === NEW Styles for Scanner and Camera === */
+.scanner-container,
+.camera-container {
     margin-bottom: 20px;
     padding: 15px;
-    background: #f8f8f8;
-    border: 1px solid #eee;
+    background: #fdfdfd;
+    border: 1px solid #e0e0e0;
     border-radius: 8px;
+    text-align: center; /* Center video and buttons */
 }
 
-video {
+.scanner-video,
+.camera-video {
     width: 100%;
+    max-width: 640px; /* Limit video width */
     height: auto;
-    max-height: 400px; /* Limit video height */
+    border: 1px solid #ccc;
     background-color: #000; /* Black background for video areas */
+    display: block; /* Ensures it takes up its own line */
+    margin: 0 auto 15px auto; /* Center video and add bottom margin */
     border-radius: 5px;
-    display: block; /* Ensure it takes up full width available */
-    margin-bottom: 10px;
 }
 
-canvas {
+#cameraCanvas {
     width: 100%;
+    max-width: 640px;
     height: auto;
-    max-height: 400px; /* Limit canvas height */
-    border-radius: 5px;
+    border: 1px solid #ccc;
+    background-color: #000;
     display: block;
-    margin-bottom: 10px;
+    margin: 0 auto 15px auto;
+    border-radius: 5px;
 }
 
-/* Bin Grid Display */
+
+/* Styles for QuaggaJS scan area */
+.drawingBuffer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.laser {
+    position: absolute;
+    background-color: red;
+    opacity: 0.7;
+    width: 100%;
+    height: 1px;
+    animation: laser-anim 1s infinite alternate;
+}
+@keyframes laser-anim {
+    from { top: 0; }
+    to { top: 100%; }
+}
+
+.section-separator {
+    margin: 30px 0;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+/* === BIN SECTION === */
 .bin-grid {
-    display: flex;
-    gap: 25px; /* More space between bins */
-    flex-wrap: wrap;
-    justify-content: flex-start; /* Align bins to the start */
-    padding: 10px 0;
+    display: grid; /* Use grid for better layout control */
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Responsive columns */
+    gap: 20px;
+    padding: 10px;
+    justify-content: center; /* Center bins if they don't fill the row */
 }
 
 .bin {
-    background: #e0f7fa; /* Light blue-green */
+    background: #e8f5e9; /* Light green background */
     border-radius: 10px;
-    width: 150px; /* Wider bins */
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 220px; /* Taller bins for better bar visualization */
-    border: 1px solid #b2ebf2;
+    align-items: center; /* Center items horizontally within the bin card */
+    min-height: 200px; /* Ensure consistent height for visual bars */
+    box-sizing: border-box; /* Include padding/border in element's total width and height */
+    transition: transform 0.2s ease-in-out; /* Add a subtle hover effect */
+}
+
+.bin:hover {
+    transform: translateY(-5px);
 }
 
 .bin h3 {
-    margin-bottom: 15px;
+    margin-top: 0;
+    margin-bottom: 10px;
     font-size: 1.2em;
-    color: #00796b;
+    color: #2e7d32; /* Darker green for bin type */
 }
 
 .bar-container {
-    height: 120px; /* Fixed height for the bar visual */
+    height: 150px; /* Fixed height for the visual bar area */
     width: 60px; /* Wider bar */
     background-color: #d4e7e6; /* Empty bar background */
     border: 1px solid #a7d9d6;
-    margin: 0 auto 15px auto; /* Centered, more margin */
-    border-radius: 8px; /* Slightly more rounded */
-    display: flex;
+    margin: 10px auto 10px auto; /* Center and add vertical margin */
+    border-radius: 8px;
+    display: flex; /* Use flexbox for vertical alignment */
     align-items: flex-end; /* Make the fill start from the bottom */
     overflow: hidden; /* Hide overflow when full */
-    position: relative; /* For status indicators */
+    position: relative; /* For the percentage text */
 }
 
 .bar {
     width: 100%;
-    background-color: #00796b; /* Main fill color */
-    border-radius: 8px 8px 0 0;
-    transition: height 0.5s ease-out, background-color 0.3s ease; /* Smooth transition for fill level and color */
+    background-color: #4caf50; /* Solid green fill */
+    border-radius: 7px 7px 0 0; /* Rounded top corners */
+    transition: height 0.5s ease-out; /* Smooth transition for fill level */
+    position: absolute; /* Position bar at the bottom of its container */
+    bottom: 0;
 }
 
-/* Bin fill level status colors */
-.bar-container.ok .bar { background-color: #2ecc71; } /* Green */
-.bar-container.warning .bar { background-color: #f39c12; } /* Orange */
-.bar-container.critical .bar { background-color: #e74c3c; } /* Red */
+.bin div:last-child { /* For the percentage text below the bar */
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #333;
+    margin-top: 5px; /* Space between bar and percentage */
+}
 
-
-/* Admin Table Styling */
+/* === ADMIN TABLE === */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 20px; /* Adjusted margin-top */
 }
 
 th, td {
-    border: 1px solid #ddd;
+    border: 1px solid #ddd; /* Lighter border */
     padding: 12px;
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
-    color: #333;
-    font-weight: bold;
+    background-color: #f2f2f2; /* Lighter background */
+    font-weight: 600;
+    color: #555; /* Softer text color */
 }
 
 tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-tr:hover {
-    background-color: #f1f1f1;
-}
-
-.status.ok {
-    color: #27ae60;
-    font-weight: bold;
-}
-
-.status.warning {
-    color: #f39c12;
-    font-weight: bold;
+    background-color: #f9f9f9; /* Light alternate row */
 }
 
 .status.critical {
-    color: #c0392b;
+    color: #d32f2f; /* Red */
     font-weight: bold;
 }
 
+.status.warning { /* NEW: Warning status */
+    color: #fbc02d; /* Orange */
+    font-weight: bold;
+}
+
+.status.ok {
+    color: #388e3c; /* Green */
+    font-weight: bold;
+}
+
+/* === MAP PLACEHOLDER === */
 .map-placeholder {
-    background-color: #e9ecef;
-    border: 1px dashed #ccc;
-    padding: 50px;
-    text-align: center;
-    color: #666;
-    font-size: 1.2em;
+    background-color: #e0e0e0; /* Neutral background */
+    height: 300px; /* Increased height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     border-radius: 8px;
-    margin-top: 20px;
+    font-size: 1.5em;
+    color: #666; /* Softer text color */
+}
+
+/* Removed old .main-container and chat app related styles */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column; /* Stack sidebar and content */
+    }
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        box-shadow: none;
+        padding-bottom: 0;
+    }
+    .sidebar nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .sidebar nav ul li {
+        margin: 5px;
+    }
+    .content-with-sidebar {
+        margin-left: 0;
+        padding: 15px;
+    }
+    .card {
+        padding: 20px;
+    }
+    .card h1 {
+        font-size: 1.8em;
+    }
+    .btn {
+        width: calc(50% - 15px); /* Two buttons per row on smaller screens */
+        box-sizing: border-box;
+    }
+    .role-buttons {
+        flex-direction: column; /* Stack role buttons on small screens */
+    }
+    .role-buttons button {
+        width: 100%;
+    }
 }
