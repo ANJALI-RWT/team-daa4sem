@@ -401,8 +401,6 @@ tr:nth-child(even) {
     color: #666; /* Softer text color */
 }
 
-/* Removed old .main-container and chat app related styles */
-
 /* Responsive adjustments */
 @media (max-width: 768px) {
     body {
