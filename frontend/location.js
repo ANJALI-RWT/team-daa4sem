@@ -72,8 +72,21 @@ function registerRole(role) {
             const statusDiv = document.getElementById('status');
 
             if (response.ok) {
-                statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
+                // Modified: Display simple success message
+                statusDiv.textContent = `✅ Registered successfully!`;
                 form.reset();
+
+                // ADDED: Redirect to dashboard after successful citizen registration
+                if (role === 'citizen') {
+                    // You might want a slight delay or a confirmation before redirecting
+                    setTimeout(() => {
+                        window.location.href = 'citizen-dashboard.html';
+                    }, 1500); // Redirect after 1.5 seconds
+                }
+                // For collectors, you might redirect them to a different dashboard
+                // or display a message that their account needs approval, etc.
+                // For now, collectors will just see the success message.
+
             } else {
                 statusDiv.style.color = 'red';
                 statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
