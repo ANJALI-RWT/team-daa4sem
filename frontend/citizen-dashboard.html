@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EcoAI Waste Management</title>
+  <title>EcoAI Waste Management - Dashboard</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -24,11 +25,26 @@
   <main class="content-with-sidebar">
     <section id="user" class="card">
       <h1>User App</h1>
-      <p>Scan barcode or upload waste image:</p>
-      <input type="text" id="barcodeInput" placeholder="Scan Barcode..." class="input" />
-      <input type="file" id="uploadInput" accept="image/*" class="input" />
-      <button class="btn" id="suggestBtn">Get Recycling Suggestion</button>
+      <p>Scan barcode or capture/upload waste image:</p>
+
+      <div class="scanner-container">
+        <video id="barcodeScanner" class="scanner-video"></video>
+        <div id="barcodeResult" class="result-card">Scanned Barcode: None</div>
+        <button class="btn" id="startBarcodeScanBtn">Start Barcode Scan</button>
+        <button class="btn" id="stopBarcodeScanBtn" style="display: none;">Stop Barcode Scan</button>
+      </div>
+
+      <hr class="section-separator"> <div class="camera-container">
+        <video id="cameraFeed" class="camera-video"></video>
+        <canvas id="cameraCanvas" style="display: none;"></canvas>
+        <input type="file" id="uploadInput" accept="image/*" class="input" />
+        <button class="btn" id="startCameraBtn">Open Camera</button>
+        <button class="btn" id="captureImageBtn" style="display: none;">Capture Image</button>
+        <button class="btn" id="stopCameraBtn" style="display: none;">Close Camera</button>
+      </div>
+      <button class="btn" id="classifyCapturedImageBtn" style="display: none;">Get Recycling Suggestion from Captured Image</button>
       <div class="result-card" id="suggestionResult">Suggestion will appear here.</div>
+
     </section>
 
     <section id="bins" class="card">
@@ -37,11 +53,11 @@
     </section>
 
     <section id="ai" class="card">
-      <h1>AI Waste Detection</h1>
+      <h1>AI Waste Detection (Direct Upload for AI)</h1>
       <p>Upload image for AI-based waste classification:</p>
       <input type="file" accept="image/*" id="aiImageInput" class="input" />
       <button class="btn" id="analyzeBtn">Analyze Image</button>
-      <div class="result-card" id="aiResult">AI Prediction: Organic Waste</div>
+      <div class="result-card" id="aiResult">AI Prediction: Unknown</div>
     </section>
 
     <section id="trucks" class="card">
@@ -62,21 +78,7 @@
           </tr>
         </thead>
         <tbody id="adminTableBody">
-          <tr>
-            <td>Zone A</td>
-            <td>#102</td>
-            <td>0%</td>
-            <td>2025-05-16</td>
-            <td class="status critical">Needs Pickup</td>
-          </tr>
-          <tr>
-            <td>Zone B</td>
-            <td>#203</td>
-            <td>0%</td>
-            <td>2025-05-15</td>
-            <td class="status ok">Okay</td>
-          </tr>
-        </tbody>
+          </tbody>
       </table>
     </section>
   </main>
