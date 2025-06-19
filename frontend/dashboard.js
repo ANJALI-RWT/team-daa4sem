@@ -1,7 +1,6 @@
 // smart-waste-frontend/dashboard.js
 
 // API Base URL (Important for connecting to your Render backend)
-// This checks if you're on localhost or a deployed Render URL
 const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://localhost:5000' // Your local Node.js server
     : 'https://team-daa4sem.onrender.com'; // Your deployed Render Node.js server URL
@@ -13,7 +12,7 @@ console.log('Backend API Base URL:', API_BASE_URL);
 let bins = [
     { id: 1, type: 'plastic', fill: 0 },
     { id: 2, type: 'organic', fill: 0 },
-    { id: 3, type: 'metal', fill: 0 },
+    { id: 3, type: 3, fill: 0 }, // Assuming type 'metal' but keep ID as 3 as per original
     { id: 4, type: 'glass', fill: 0 },
     { id: 5, type: 'paper', fill: 0 },
     { id: 6, type: 'electronic', fill: 0 } // Added electronic for example
@@ -62,7 +61,7 @@ function renderBins() {
         // Adjust the height multiplier for visual effect (original bar was 40px, now using 150px container for bar)
         const visualHeight = (fillHeight / 100) * 150; // Max height of 150px for 100% fill
         binDiv.innerHTML = `
-            <h3>Bin ${bin.id} (${bin.type.charAt(0).toUpperCase() + bin.type.slice(1)})</h3>
+            <h3>Bin ${bin.id} (${String(bin.type).charAt(0).toUpperCase() + String(bin.type).slice(1)})</h3>
             <div class="bar-container">
                 <div class="bar" style="height: ${visualHeight}px;"></div>
             </div>
