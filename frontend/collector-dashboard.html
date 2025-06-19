@@ -1,1 +1,54 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoAI Waste Management - Collector Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoCcT8u8eD/h5E3I0W7c7Q6D6M/4R4b4Q4W1Q8Q="
+     crossorigin=""/>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-2H3uD3+bE1K8z60eX6+wX7E9q+H8F/rK/8+W+S/W2g="
+     crossorigin=""></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">♻ EcoAI</div>
+    <nav>
+      <ul>
+        <li><a href="#map">🗺 Collector Map</a></li>
+        <li><a href="#stats">📊 Collection Stats</a></li>
+        <!-- Add more collector-specific navigation if needed -->
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content-with-sidebar">
+    <section id="map" class="card">
+      <h1>Collector Map View</h1>
+      <p id="mapStatus">Loading map and full bin data...</p>
+      <div id="collectorMap" style="height: 500px; width: 100%; border-radius: 8px;"></div>
+      <button class="btn" id="pickupDoneBtn" style="display: none; margin-top: 20px;">✅ Pickup Done</button>
+      <button class="btn" id="centerMapBtn" style="margin-top: 10px;">📍 Center Map on My Location</button>
+    </section>
+
+    <section id="stats" class="card">
+      <h1>Collection Statistics</h1>
+      <div class="result-card">
+        <p>Total Bins Collected Today: <span id="binsCollectedToday">0</span></p>
+        <p>Total Weight Collected Today: <span id="weightCollectedToday">0 kg</span></p>
+        <p>Your Current Location: <span id="currentCollectorLocation">Detecting...</span></p>
+        <p>Next Bin To Collect: <span id="nextBinInfo">None</span></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="collector-dashboard.js"></script>
+</body>
+</html>
