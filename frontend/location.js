@@ -72,20 +72,22 @@ function registerRole(role) {
             const statusDiv = document.getElementById('status');
 
             if (response.ok) {
-                // Modified: Display simple success message
-                statusDiv.textContent = `✅ Registered successfully!`;
+                statusDiv.textContent = `✅ Registered successfully! Redirecting...`;
                 form.reset();
 
-                // ADDED: Redirect to dashboard after successful citizen registration
+                // ADDED/MODIFIED: Redirect logic for both roles
                 if (role === 'citizen') {
-                    // You might want a slight delay or a confirmation before redirecting
                     setTimeout(() => {
-                        window.location.href = 'citizen-dashboard.html';
-                    }, 1500); // Redirect after 1.5 seconds
+                        window.location.href = 'citizen-dashboard.html'; // Redirect to citizen dashboard
+                    }, 1500);
+                } else if (role === 'collector') {
+                    // For collectors, we'll redirect them to the same dashboard for now.
+                    // In a full application, you'd create a separate 'collector-dashboard.html'
+                    // and redirect there, possibly with a message like "Waiting for Admin Approval".
+                    setTimeout(() => {
+                        window.location.href = 'citizen-dashboard.html'; // Redirect to a dashboard for collectors
+                    }, 1500);
                 }
-                // For collectors, you might redirect them to a different dashboard
-                // or display a message that their account needs approval, etc.
-                // For now, collectors will just see the success message.
 
             } else {
                 statusDiv.style.color = 'red';
