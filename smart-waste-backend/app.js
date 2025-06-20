@@ -1,5 +1,4 @@
-// smart-waste-backend/app.js
-""require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -101,7 +100,7 @@ app.post('/api/register/collector', async (req, res) => {
   }
 });
 
-// ✅ Simulate Bin Fill + Auto Status + FullBin Logging
+// ✅ Simulate Bin Fill + FullBin Logging
 app.post('/api/simulate-bin-fill', async (req, res) => {
   try {
     const { username, type, weight } = req.body;
@@ -112,10 +111,7 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    let newWeight = 0;
-    let capacity = 0;
-    let percent = 0;
-    let status = "Okay";
+    let newWeight = 0, capacity = 0, percent = 0, status = "Okay";
 
     if (type === 'Bio') {
       const current = user.currentBioWeight || 0;
@@ -145,22 +141,32 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
 
     if (status === 'Needs Pickup') {
       await FullBin.updateOne(
-        { username },
+        { username, type },
         { username, lat, lng, type },
         { upsert: true }
       );
       console.log(`📣 Notify: ${type} bin for '${username}' is full at ${user.location}`);
     }
 
-    return res.json({
+    res.json({
       message: `✅ ${type} bin updated for ${username}`,
       weight: newWeight,
       percent: percent.toFixed(1),
       status
     });
-
   } catch (error) {
     console.error('❌ simulate-bin-fill error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ✅ Get All Full Bins
+app.get('/api/full-bins', async (req, res) => {
+  try {
+    const bins = await FullBin.find({});
+    res.json(bins);
+  } catch (error) {
+    console.error('Error fetching full bins:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -178,42 +184,37 @@ app.get('/api/get-user/:username', async (req, res) => {
   }
 });
 
-// ✅ Get All Full Bins
-app.get('/api/full-bins', async (req, res) => {
-  try {
-    const bins = await FullBin.find({});
-    res.json(bins);
-  } catch (error) {
-    console.error('Error fetching full bins:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// ✅ Confirm Collector Pickup
+// ✅ Confirm Collector Pickup (Corrected!)
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
     if (!binId) return res.status(400).json({ error: 'Bin ID is required.' });
 
-    const user = await User.findById(binId);
-    if (!user) return res.status(404).json({ error: 'User bin not found.' });
+    const fullBin = await FullBin.findById(binId);
+    if (!fullBin) return res.status(404).json({ error: 'Full bin not found.' });
 
-    user.currentBioWeight = 0;
-    user.currentNonBioWeight = 0;
-    user.bioStatus = 'Okay';
-    user.nonBioStatus = 'Okay';
+    const user = await User.findOne({ username: fullBin.username });
+    if (!user) return res.status(404).json({ error: 'Associated user not found.' });
+
+    if (fullBin.type === 'Bio') {
+      user.currentBioWeight = 0;
+      user.bioStatus = 'Okay';
+    } else if (fullBin.type === 'Non-Bio') {
+      user.currentNonBioWeight = 0;
+      user.nonBioStatus = 'Okay';
+    }
+
     await user.save();
+    await FullBin.deleteOne({ _id: binId });
 
-    await FullBin.deleteOne({ username: user.username });
-
-    res.json({ message: `✅ Bin for ${user.username} has been cleared.` });
+    res.json({ message: `✅ ${fullBin.type} bin for ${user.username} has been cleared.` });
   } catch (error) {
     console.error('Error in pickup-confirm:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// ✅ Mock AI Classification
+// ✅ AI Classification (Mock)
 app.post('/api/classify-image', upload.single('image'), async (req, res) => {
   try {
     const file = req.file;
