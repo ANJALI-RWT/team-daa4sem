@@ -1,12 +1,11 @@
-// 🚮 Bin State (per registered user)
 let bioBin = 0;
 let nonBioBin = 0;
 let bioCapacity = 10;
 let nonBioCapacity = 15;
+let lastPickupDate = null;
 
 const API_BASE = 'https://team-daa4sem.onrender.com';
 
-// ✅ Load capacity from sessionStorage if available
 const bioCapStored = sessionStorage.getItem("bioCap");
 const nonBioCapStored = sessionStorage.getItem("nonBioCap");
 if (bioCapStored) bioCapacity = parseFloat(bioCapStored);
@@ -26,6 +25,7 @@ async function fetchBinState() {
     nonBioBin = data.currentNonBioWeight || 0;
     bioCapacity = data.bioCapacity || 10;
     nonBioCapacity = data.nonBioCapacity || 15;
+    lastPickupDate = data.lastPickup ? new Date(data.lastPickup) : null;
 
     sessionStorage.setItem("bioCap", bioCapacity);
     sessionStorage.setItem("nonBioCap", nonBioCapacity);
@@ -61,231 +61,24 @@ function updateAdminTable() {
   const bioPercent = Math.min(100, (bioBin / bioCapacity) * 100);
   const nonBioPercent = Math.min(100, (nonBioBin / nonBioCapacity) * 100);
 
+  const lastCollected = lastPickupDate
+    ? lastPickupDate.toLocaleDateString()
+    : 'Not Available';
+
   document.getElementById('adminTableBody').innerHTML = `
     <tr>
       <td>Zone A</td>
       <td>#101</td>
       <td>${bioPercent.toFixed(0)}%</td>
-      <td>${new Date().toISOString().slice(0, 10)}</td>
+      <td>${lastCollected}</td>
       <td class="status ${bioPercent >= 80 ? 'critical' : 'ok'}">${bioPercent >= 80 ? 'Needs Pickup' : 'Okay'}</td>
     </tr>
     <tr>
       <td>Zone B</td>
       <td>#102</td>
       <td>${nonBioPercent.toFixed(0)}%</td>
-      <td>${new Date().toISOString().slice(0, 10)}</td>
+      <td>${lastCollected}</td>
       <td class="status ${nonBioPercent >= 80 ? 'critical' : 'ok'}">${nonBioPercent >= 80 ? 'Needs Pickup' : 'Okay'}</td>
     </tr>
   `;
 }
-
-// 🔍 Barcode Lookup API
-async function lookupBarcode(barcode) {
-  const res = await fetch(`${API_BASE}/api/lookup-barcode`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ barcode })
-  });
-  return await res.json();
-}
-
-// 🧠 AI Classification API
-async function sendToAI(file) {
-  const formData = new FormData();
-  formData.append("image", file);
-
-  const response = await fetch(`${API_BASE}/api/classify-image`, {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) throw new Error("AI classification failed");
-
-  return await response.json();
-}
-
-// 📦 Suggestion Button Click
-document.getElementById('suggestBtn').addEventListener('click', async () => {
-  const barcode = document.getElementById('barcodeInput').value.trim();
-  const fileInput = document.getElementById('uploadInput');
-  const suggestionDiv = document.getElementById('suggestionResult');
-
-  if (barcode) {
-    try {
-      suggestionDiv.textContent = '🔎 Looking up barcode...';
-      const result = await lookupBarcode(barcode);
-      suggestionDiv.textContent = `♻️ Detected Waste Type: ${result.waste_type}.`;
-
-      const weight = result.estimated_weight || 0.2;
-      const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
-
-      // ✅ Prevent overflow
-      if (type === 'Bio') {
-        if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
-        bioBin += weight;
-      } else {
-        if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
-        nonBioBin += weight;
-      }
-
-      updateBins();
-      updateAdminTable();
-
-      await fetch(`${API_BASE}/api/simulate-bin-fill`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: sessionStorage.getItem('username'),
-          type: type,
-          weight: weight
-        })
-      });
-
-    } catch (err) {
-      console.error(err);
-      suggestionDiv.textContent = '❌ Barcode lookup failed.';
-    }
-  } else if (fileInput.files.length > 0) {
-    const file = fileInput.files[0];
-    try {
-      suggestionDiv.textContent = '🔄 Analyzing image...';
-      const result = await sendToAI(file);
-      suggestionDiv.textContent = `♻️ AI Detected Waste Type: ${result.waste_type}.`;
-
-      const weight = result.estimated_weight || 0.2;
-      const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
-
-      // ✅ Prevent overflow
-      if (type === 'Bio') {
-        if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
-        bioBin += weight;
-      } else {
-        if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
-        nonBioBin += weight;
-      }
-
-      updateBins();
-      updateAdminTable();
-
-      await fetch(`${API_BASE}/api/simulate-bin-fill`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: sessionStorage.getItem('username'),
-          type: type,
-          weight: weight
-        })
-      });
-
-    } catch (err) {
-      console.error(err);
-      suggestionDiv.textContent = '❌ Image classification failed.';
-    }
-  } else {
-    suggestionDiv.textContent = '⚠️ Please scan a barcode or upload an image.';
-  }
-});
-
-// 🧠 Analyze Button (AI Only)
-document.getElementById('analyzeBtn').addEventListener('click', async () => {
-  const aiInput = document.getElementById('aiImageInput');
-  const aiResult = document.getElementById('aiResult');
-
-  if (aiInput.files.length === 0) {
-    aiResult.textContent = '❌ Please upload an image to analyze.';
-    return;
-  }
-
-  const file = aiInput.files[0];
-
-  try {
-    aiResult.textContent = '🔄 Analyzing image...';
-    const result = await sendToAI(file);
-    aiResult.textContent = `♻️ Detected Waste Type: ${result.waste_type}.`;
-
-    const weight = result.estimated_weight || 0.2;
-    const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
-
-    // ✅ Prevent overflow
-    if (type === 'Bio') {
-      if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
-      bioBin += weight;
-    } else {
-      if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
-      nonBioBin += weight;
-    }
-
-    updateBins();
-    updateAdminTable();
-
-    await fetch(`${API_BASE}/api/simulate-bin-fill`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: sessionStorage.getItem('username'),
-        type: type,
-        weight: weight
-      })
-    });
-
-  } catch (error) {
-    console.error(error);
-    aiResult.textContent = '❌ AI classification failed.';
-  }
-});
-
-// 📷 Start Barcode Scanner
-function startBarcodeScanner() {
-  const video = document.getElementById('barcodeCam');
-  const resultDiv = document.getElementById('suggestionResult');
-  video.style.display = 'block';
-  resultDiv.textContent = '📷 Starting camera...';
-
-  Quagga.init({
-    inputStream: {
-      type: "LiveStream",
-      constraints: { facingMode: "environment" },
-      target: video
-    },
-    decoder: {
-      readers: ["ean_reader", "upc_reader", "code_128_reader", "code_39_reader"]
-    }
-  }, err => {
-    if (err) {
-      console.error(err);
-      resultDiv.textContent = '❌ Camera init failed.';
-      return;
-    }
-    Quagga.start();
-  });
-
-  let lastScannedCode = null;
-
-  Quagga.onDetected(result => {
-    const code = result.codeResult.code;
-    if (code !== lastScannedCode) {
-      lastScannedCode = code;
-      document.getElementById('barcodeInput').value = code;
-      resultDiv.textContent = '✅ Barcode scanned successfully!';
-      Quagga.stop();
-      video.style.display = 'none';
-    }
-  });
-
-  Quagga.onProcessed(result => {
-    if (!result || !result.codeResult || !result.codeResult.code) {
-      resultDiv.textContent = '❌ No barcode detected. Try again.';
-    }
-  });
-}
-
-// ❌ Stop Barcode Scanner
-function stopBarcodeScanner() {
-  const video = document.getElementById('barcodeCam');
-  Quagga.stop();
-  video.style.display = 'none';
-  document.getElementById('suggestionResult').textContent = '❌ Scan cancelled.';
-}
-
-// 🚀 Initial Load
-window.onload = fetchBinState;
