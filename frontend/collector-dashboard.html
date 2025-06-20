@@ -1,32 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Collector Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <title>Collector Map (Leaflet + OSM)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    crossorigin=""
+  />
   <style>
-    #map { height: 400px; border-radius: 10px; margin-top: 10px; }
-    .collector-info { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-    .btn-pickup { background-color: #4caf50; color: white; border: none; padding: 5px 10px; margin-top: 5px; cursor: pointer; border-radius: 4px; }
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; width: 100%; }
+    h1 { text-align: center; margin: 0; padding: 10px; background: #f5f5f5; }
   </style>
 </head>
 <body>
 
-  <main style="padding: 20px; max-width: 1000px; margin: auto;">
-    <h1>🚛 Collector Dashboard</h1>
+<h1>🚛 Collector Map View (Leaflet)</h1>
+<div id="map"></div>
 
-    <div class="collector-info">
-      <p><strong>👷 Collector:</strong> <span id="collectorName">Loading...</span></p>
-      <p><strong>📍 Location:</strong> <span id="collectorLocation">Detecting...</span></p>
-      <p><strong>🚛 Truck Capacity:</strong> <span id="truckCapacity">--</span> tons</p>
-    </div>
+<script 
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+  crossorigin="">
+</script>
 
-    <div id="map"></div>
-  </main>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="collector.js"></script>
+<script src="collectorMap.js"></script>
 </body>
 </html>
