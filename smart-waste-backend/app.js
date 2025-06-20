@@ -1,6 +1,4 @@
-require('dotenv').config(); // Load environment variables from .env
-console.log('Mongo URI loaded:', process.env.MONGODB_URI);
-
+require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -10,21 +8,22 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json()); // Parse incoming JSON requests
+app.use(express.json()); // Parse JSON requests
 
-// Connect to MongoDB Atlas (without deprecated options)
+// MongoDB connection
 const mongoURI = process.env.MONGODB_URI;
-
 mongoose.connect(mongoURI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Define Mongoose Schemas and Models
+/* ------------------ Schema Definitions ------------------ */
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  location: { type: String, required: true },
+  location: { type: String, required: true }, // format: "lat,lng"
   bioCapacity: { type: Number, required: true, min: 0 },
-  nonBioCapacity: { type: Number, required: true, min: 0 }
+  nonBioCapacity: { type: Number, required: true, min: 0 },
+  currentBioWeight: { type: Number, default: 0 },
+  currentNonBioWeight: { type: Number, default: 0 }
 });
 
 const collectorSchema = new mongoose.Schema({
@@ -36,14 +35,14 @@ const collectorSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Collector = mongoose.model('Collector', collectorSchema);
 
-// Routes
+/* ------------------ Routes ------------------ */
 
-// Root route
+// Root test
 app.get('/', (req, res) => {
-  res.send('Smart Waste Management Backend is running.');
+  res.send('🌱 Smart Waste Management Backend is running.');
 });
 
-// Register User
+// 📌 Register User
 app.post('/api/register/user', async (req, res) => {
   try {
     const { username, location, bioCapacity, nonBioCapacity } = req.body;
@@ -52,9 +51,16 @@ app.post('/api/register/user', async (req, res) => {
       return res.status(400).json({ error: 'Please provide all required fields.' });
     }
 
-    const newUser = new User({ username, location, bioCapacity, nonBioCapacity });
-    await newUser.save();
+    const newUser = new User({
+      username,
+      location,
+      bioCapacity,
+      nonBioCapacity,
+      currentBioWeight: 0,
+      currentNonBioWeight: 0
+    });
 
+    await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error registering user:', error);
@@ -62,7 +68,7 @@ app.post('/api/register/user', async (req, res) => {
   }
 });
 
-// Register Collector
+// 📌 Register Collector
 app.post('/api/register/collector', async (req, res) => {
   try {
     const { username, location, truckCapacity } = req.body;
@@ -81,17 +87,16 @@ app.post('/api/register/collector', async (req, res) => {
   }
 });
 
-// Start server
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+/* ------------------ Full Bin APIs ------------------ */
 
-// GET full bins (100%)
+// ✅ GET full bins (100% full)
 app.get('/api/full-bins', async (req, res) => {
   try {
     const fullUsers = await User.find({
-      $or: [{ bioCapacity: { $gte: 100 } }, { nonBioCapacity: { $gte: 100 } }]
+      $or: [
+        { $expr: { $gte: ["$currentBioWeight", "$bioCapacity"] } },
+        { $expr: { $gte: ["$currentNonBioWeight", "$nonBioCapacity"] } }
+      ]
     });
 
     const bins = fullUsers.map(user => {
@@ -100,7 +105,7 @@ app.get('/api/full-bins', async (req, res) => {
         id: user._id,
         lat,
         lng,
-        type: user.bioCapacity >= 100 ? 'Bio' : 'Non-Bio'
+        type: user.currentBioWeight >= user.bioCapacity ? 'Bio' : 'Non-Bio'
       };
     });
 
@@ -110,19 +115,18 @@ app.get('/api/full-bins', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// POST pickup confirmation (reset bin to 0%)
+
+// ✅ POST pickup confirmation → reset both weights to 0
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
-
     if (!binId) return res.status(400).json({ error: 'Bin ID is required.' });
 
     const user = await User.findById(binId);
     if (!user) return res.status(404).json({ error: 'User bin not found.' });
 
-    // Reset bin capacities
-    user.bioCapacity = 0;
-    user.nonBioCapacity = 0;
+    user.currentBioWeight = 0;
+    user.currentNonBioWeight = 0;
     await user.save();
 
     res.json({ message: `✅ Bin for ${user.username} has been cleared.` });
@@ -130,4 +134,37 @@ app.post('/api/pickup-confirm', async (req, res) => {
     console.error('Error in pickup-confirm:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+/* ------------------ OPTIONAL: Simulate Bin Fill ------------------ */
+// Simulate adding waste to a user’s bin
+app.post('/api/simulate-bin-fill', async (req, res) => {
+  try {
+    const { username, type, weight } = req.body;
+    if (!username || !type || weight == null) {
+      return res.status(400).json({ error: 'Provide username, type, and weight.' });
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+
+    if (type === 'Bio') {
+      user.currentBioWeight += weight;
+    } else if (type === 'Non-Bio') {
+      user.currentNonBioWeight += weight;
+    } else {
+      return res.status(400).json({ error: 'Invalid bin type.' });
+    }
+
+    await user.save();
+    res.json({ message: `Added ${weight}kg to ${type} bin for ${username}.` });
+  } catch (error) {
+    console.error('Error in simulate-bin-fill:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/* ------------------ Server Start ------------------ */
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
