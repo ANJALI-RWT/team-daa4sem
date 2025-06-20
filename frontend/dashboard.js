@@ -130,6 +130,24 @@ document.getElementById('analyzeBtn').addEventListener('click', () => {
   const prediction = classifyWasteFromImage(aiInput.files[0]);
   aiResult.textContent = `AI Prediction: ${prediction.charAt(0).toUpperCase() + prediction.slice(1)} Waste`;
 });
+function startBarcodeScanner() {
+  Quagga.init({
+    inputStream: {
+      type: "LiveStream",
+      constraints: { facingMode: "environment" },
+      target: document.querySelector('#barcodeCam'),
+    },
+    decoder: { readers: ["ean_reader"] },
+  }, err => {
+    if (err) return console.error(err);
+    Quagga.start();
+  });
+
+  Quagga.onDetected(data => {
+    document.getElementById('barcodeInput').value = data.codeResult.code;
+    Quagga.stop();
+  });
+}
 
 // Initial render
 renderBins();
