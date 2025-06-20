@@ -1,86 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoAI Waste Management</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Waste Management - Join the Green Mission</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="location.js" defer></script>
 </head>
 <body>
-    <header class="hero">
-        <div class="header-content">
-            <h1>EcoAI Waste Management</h1>
-            <p>Smart solutions for a cleaner planet.</p>
+  <main class="hero">
+    <div class="overlay"></div>
+
+    <section class="content">
+      <h1>🌱 Join the Green Mission</h1>
+      <p>Be part of a smarter, cleaner planet. Register your location and take action today.</p>
+
+      <div class="form-box">
+        <p class="role-prompt">👉 Are you a...</p>
+        <div class="role-buttons">
+          <button onclick="registerRole('citizen')">🚶 Citizen / User</button>
+          <button onclick="registerRole('collector')">🚛 Waste Collector</button>
         </div>
-    </header>
 
-    <main class="container">
-        <section class="card" id="registrationSection">
-            <h2>Register</h2>
-            <div class="registration-options">
-                <button class="btn" id="showUserReg">Register as User</button>
-                <button class="btn" id="showCollectorReg">Register as Collector</button>
-            </div>
+       <div id="dynamic-form"></div>
+       <div id="status" style="margin-top: 10px; color: green;"></div>
 
-            <form id="registerUserForm" class="registration-form hidden">
-                <h3>User Registration</h3>
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="text" id="userLocation" placeholder="Your Location (e.g., 28.3670,79.4304)" required>
-                <button type="button" class="btn small-btn" onclick="getCurrentLocation('userLocation')">Get My Location</button>
-                <input type="number" id="bioCapacity" placeholder="Bio Waste Capacity (kg)" min="0" required>
-                <input type="number" id="nonBioCapacity" placeholder="Non-Bio Waste Capacity (kg)" min="0" required>
-                <button type="submit" class="btn primary-btn">Register User</button>
-                <button type="button" class="btn secondary-btn" id="hideUserReg">Cancel</button>
-            </form>
-
-            <form id="registerCollectorForm" class="registration-form hidden">
-                <h3>Collector Registration</h3>
-                <input type="text" id="collectorUsername" placeholder="Username" required>
-                <input type="text" id="collectorLocation" placeholder="Your Location (e.g., 28.3670,79.4304)" required>
-                <button type="button" class="btn small-btn" onclick="getCurrentLocation('collectorLocation')">Get My Location</button>
-                <input type="number" id="truckCapacity" placeholder="Truck Capacity (kg)" min="0" required>
-                <button type="submit" class="btn primary-btn">Register Collector</button>
-                <button type="button" class="btn secondary-btn" id="hideCollectorReg">Cancel</button>
-            </form>
-        </section>
-
-        <section class="card" id="loginSection">
-            <h2>Login (Placeholder)</h2>
-            <p>For now, registration automatically logs you in and redirects to the dashboard.</p>
-            <p>You can also access dashboards directly:</p>
-            <ul>
-                <li><a href="dashboard.html">Citizen Dashboard</a></li>
-                <li><a href="collector-dashboard.html">Collector Dashboard</a></li>
-            </ul>
-            </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 EcoAI Waste Management. All rights reserved.</p>
-    </footer>
-
-    <script src="location.js"></script> <script>
-        // Script for showing/hiding registration forms
-        document.getElementById('showUserReg').addEventListener('click', () => {
-            document.getElementById('registerUserForm').classList.remove('hidden');
-            document.getElementById('registerCollectorForm').classList.add('hidden');
-            document.querySelector('.registration-options').classList.add('hidden');
-        });
-        document.getElementById('hideUserReg').addEventListener('click', () => {
-            document.getElementById('registerUserForm').classList.add('hidden');
-            document.querySelector('.registration-options').classList.remove('hidden');
-        });
-
-        document.getElementById('showCollectorReg').addEventListener('click', () => {
-            document.getElementById('registerCollectorForm').classList.remove('hidden');
-            document.getElementById('registerUserForm').classList.add('hidden');
-            document.querySelector('.registration-options').classList.add('hidden');
-        });
-        document.getElementById('hideCollectorReg').addEventListener('click', () => {
-            document.getElementById('registerCollectorForm').classList.add('hidden');
-            document.querySelector('.registration-options').classList.remove('hidden');
-        });
-    </script>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
