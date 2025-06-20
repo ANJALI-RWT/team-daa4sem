@@ -1,129 +1,178 @@
-const API_BASE = 'https://team-daa4sem.onrender.com';
-const USERNAME = sessionStorage.getItem('username');
+// collectorMap.js
+const API_BASE = 'https://team-daa4sem.onrender.com'; // Your backend API base URL
 
-let map;
-let routingControl;
-let binMarkers = [];
+let map; // Leaflet map object
+let routingControl; // Leaflet Routing Machine control object
+let collectorLocation = null; // Stores the collector's current LatLng
 
+// Initialize the map and start the process
 function initMap() {
-  map = L.map('collectorMap').setView([20.5937, 78.9629], 5); // Default India center
+  // Set default map view (e.g., Bareilly, Uttar Pradesh, India - based on current context)
+  // You might want to center it on the collector's last known location from DB or a default area.
+  map = L.map('map').setView([28.367, 79.430], 13); // Latitude, Longitude, Zoom level for Bareilly
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(map);
+
+  getCollectorLocation(); // Get collector's real-time location
+  // Fetch bins immediately and then set an interval for updates
+  fetchAndDisplayFullBins();
+  setInterval(fetchAndDisplayFullBins, 30000); // Refresh full bins every 30 seconds
 }
 
-async function getCurrentLocation() {
-  return new Promise((resolve, reject) => {
+// Get the collector's current geographical location
+function getCollectorLocation() {
+  if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      pos => resolve([pos.coords.latitude, pos.coords.longitude]),
-      err => reject('❌ Could not get current location')
+      (position) => {
+        collectorLocation = L.latLng(position.coords.latitude, position.coords.longitude);
+        console.log('✅ Collector Current Location:', collectorLocation);
+
+        // Add a marker for the collector's location
+        L.marker(collectorLocation, {
+          title: 'Your Current Location', // Added title to distinguish from bin markers
+          icon: L.icon({ // Custom icon for collector
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3667/3667185.png', // A truck icon, you can host your own
+            iconSize: [38, 38],
+            iconAnchor: [19, 38],
+            popupAnchor: [0, -30]
+          })
+        }).addTo(map)
+          .bindPopup('<b>Your Current Location</b>')
+          .openPopup();
+
+        map.setView(collectorLocation, 13); // Center map on collector's location
+        fetchAndDisplayFullBins(); // Re-fetch bins to draw routes with collector's location
+      },
+      (error) => {
+        console.error('❌ Error getting collector location:', error);
+        alert('Could not get your current location. Please allow location access for route planning.');
+        // If location cannot be obtained, still attempt to fetch bins but without a starting point for routing
+        fetchAndDisplayFullBins();
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
     );
-  });
+  } else {
+    alert('Geolocation is not supported by your browser. Cannot get live location.');
+    fetchAndDisplayFullBins(); // Still try to get bins, but no collector point
+  }
 }
 
-async function fetchFullBinsAndDrawRoute() {
+// Fetch full bins from the backend and display them on the map
+async function fetchAndDisplayFullBins() {
   try {
-    // 1. Get collector location
-    const collectorLocation = await getCurrentLocation();
-    map.setView(collectorLocation, 14);
+    const response = await fetch(`${API_BASE}/api/full-bins`);
+    if (!response.ok) throw new Error('Failed to fetch full bins from server.');
+    const fullBins = await response.json();
+    console.log('Fetched Full Bins:', fullBins);
 
-    // 2. Fetch full bins from backend
-    const res = await fetch(`${API_BASE}/api/full-bins`);
-    if (!res.ok) throw new Error('Failed to fetch full bin data');
-
-    const bins = await res.json(); // Expected: [{ lat, lng, type, zone, id }]
-    clearMapMarkers();
-
-    if (bins.length === 0) {
-      alert('✅ No full bins at the moment.');
-      return;
+    // Clear existing routing control and bin markers (but keep collector marker)
+    if (routingControl) {
+      map.removeControl(routingControl);
+      routingControl = null; // Reset routing control
     }
-
-    // 3. Mark each bin on the map
-    bins.forEach(bin => {
-      const marker = L.marker([bin.lat, bin.lng], {
-        title: `${bin.type} Bin - ${bin.zone}`,
-        icon: L.icon({
-          iconUrl: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-          iconSize: [32, 32],
-          iconAnchor: [16, 32],
-          popupAnchor: [0, -32]
-        })
-      }).addTo(map)
-        .bindPopup(`<strong>${bin.type} Bin</strong><br>Zone: ${bin.zone}<br>ID: ${bin.id}`);
-      binMarkers.push(marker);
+    map.eachLayer(layer => {
+      // Remove all markers except the one for the collector's location
+      if (layer instanceof L.Marker && layer.options.title !== 'Your Current Location') {
+        map.removeLayer(layer);
+      }
     });
 
-    // 4. Draw route to the first full bin
-    drawRoute(collectorLocation, [bins[0].lat, bins[0].lng]);
+    if (fullBins.length > 0 && collectorLocation) {
+      const waypoints = [collectorLocation]; // Start waypoint is collector's location
+
+      // Add markers for each full bin
+      fullBins.forEach(bin => {
+        const binLatLng = L.latLng(bin.lat, bin.lng);
+        waypoints.push(binLatLng); // Add bin to waypoints for routing
+        
+        // Custom icon for bins (e.g., a trash can)
+        const binIcon = L.icon({
+          iconUrl: bin.type === 'Bio' ? 'https://cdn-icons-png.flaticon.com/512/1792/1792557.png' : 'https://cdn-icons-png.flaticon.com/512/1792/1792559.png', // Green for bio, blue for non-bio
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -25]
+        });
+
+        L.marker(binLatLng, { icon: binIcon })
+          .addTo(map)
+          .bindPopup(`
+            <b>🗑️ ${bin.type} Bin for ${bin.username}</b><br>
+            Location: ${bin.lat.toFixed(4)}, ${bin.lng.toFixed(4)}<br>
+            <button onclick="confirmPickup('${bin._id}')" style="background-color: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; margin-top: 5px;">
+              Mark as Collected
+            </button>
+          `);
+      });
+
+      // Initialize Leaflet Routing Machine with waypoints
+      routingControl = L.Routing.control({
+        waypoints: waypoints,
+        routeWhileDragging: false, // Don't recalculate route while dragging markers (we disabled dragging)
+        showAlternatives: false, // Don't show alternative routes
+        addWaypoints: false, // Prevent users from adding new waypoints on the map
+        draggableWaypoints: false, // Prevent users from dragging existing waypoints
+        lineOptions: { // Customize route line
+            styles: [{ color: 'blue', opacity: 0.8, weight: 6 }]
+        },
+        router: L.routing.osrmv1({ // Use OSRM for routing (free, open-source)
+            serviceUrl: 'https://router.project-osrm.org/route/v1'
+        })
+      }).addTo(map);
+
+      // Fit map bounds to the route
+      routingControl.on('routesfound', function(e) {
+        const routes = e.routes;
+        if (routes.length > 0) {
+          const bounds = L.latLngBounds(routes[0].coordinates);
+          map.fitBounds(bounds.pad(0.1)); // Pad slightly
+        }
+      });
+
+    } else if (fullBins.length === 0) {
+      console.log('🎉 No bins need pickup right now.');
+      alert('🎉 No bins need pickup right now!');
+    } else if (!collectorLocation) {
+      console.warn("Collector's location not available. Cannot draw route to bins.");
+      alert("Collector's location not available. Cannot draw route to bins.");
+    }
 
   } catch (error) {
-    console.error('❌ Error in fetchFullBinsAndDrawRoute:', error);
+    console.error('❌ Error fetching and displaying full bins:', error);
+    alert('Error loading bin data: ' + error.message);
   }
 }
 
-function drawRoute(from, to) {
-  if (routingControl) {
-    map.removeControl(routingControl);
+// Function to confirm a bin pickup (called from marker popup)
+async function confirmPickup(binId) {
+  if (!confirm('Are you sure you want to mark this bin as collected?')) {
+    return;
   }
-
-  routingControl = L.Routing.control({
-    waypoints: [
-      L.latLng(from[0], from[1]),
-      L.latLng(to[0], to[1])
-    ],
-    routeWhileDragging: false,
-    show: false,
-    addWaypoints: false
-  }).addTo(map);
-}
-
-function clearMapMarkers() {
-  binMarkers.forEach(marker => map.removeLayer(marker));
-  binMarkers = [];
-}
-
-function refreshEverything() {
-  fetchUserBinStatus();          // Optional personal bin display
-  fetchFullBinsAndDrawRoute();   // Fetch map markers + route
-}
-
-async function fetchUserBinStatus() {
-  if (!USERNAME) return;
-
   try {
-    const res = await fetch(`${API_BASE}/api/get-user/${USERNAME}`);
-    if (!res.ok) throw new Error('Failed to fetch user data');
+    const response = await fetch(`${API_BASE}/api/pickup-confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ binId })
+    });
 
-    const user = await res.json();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to confirm pickup.');
+    }
 
-    const bioPercent = Math.min(100, ((user.currentBioWeight / user.bioCapacity) * 100).toFixed(1));
-    const nonBioPercent = Math.min(100, ((user.currentNonBioWeight / user.nonBioCapacity) * 100).toFixed(1));
-
-    document.getElementById("bio-fill").textContent =
-      `${user.currentBioWeight} / ${user.bioCapacity} kg (${bioPercent}%)`;
-
-    document.getElementById("nonbio-fill").textContent =
-      `${user.currentNonBioWeight} / ${user.nonBioCapacity} kg (${nonBioPercent}%)`;
-
-    document.getElementById("bio-status").textContent = user.bioStatus;
-    document.getElementById("nonbio-status").textContent = user.nonBioStatus;
-
-    document.getElementById("bio-status").style.color =
-      user.bioStatus === 'Needs Pickup' ? 'red' : 'green';
-
-    document.getElementById("nonbio-status").style.color =
-      user.nonBioStatus === 'Needs Pickup' ? 'red' : 'green';
-
+    const result = await response.json();
+    alert(result.message);
+    fetchAndDisplayFullBins(); // Refresh the map to remove the collected bin
   } catch (error) {
-    console.error('❌ Error fetching bin status:', error);
+    console.error('❌ Error confirming pickup:', error);
+    alert('Error confirming pickup: ' + error.message);
   }
 }
 
-// 🔁 Auto-refresh logic
-window.onload = () => {
-  initMap();
-  refreshEverything();
-  setInterval(refreshEverything, 30000); // Every 30 seconds
-};
+// Initialize map when the window loads
+window.onload = initMap;
