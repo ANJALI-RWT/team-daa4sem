@@ -1,122 +1,114 @@
-function registerRole(role) {
-    const formContainer = document.getElementById('dynamic-form');
-    let formHTML = '';
+// smart-waste-frontend/location.js
 
-    const commonFields = `
-        <label>Username:<br><input type="text" name="username" required></label><br>
-        <label>Location:<br><input type="text" name="location" id="location-input" readonly required placeholder="Detecting location..."></label><br>
-    `;
+// API Base URL (Important for connecting to your Render backend)
+const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000' // Your local Node.js server
+    : 'https://team-daa4sem.onrender.com'; // Your deployed Render Node.js server URL
 
-    if (role === 'collector') {
-        formHTML = `
-            <h3>Collector Registration</h3>
-            <form id="collector-form">
-                ${commonFields}
-                <label>Truck Capacity (tons):<br><input type="number" name="truckCapacity" min="1" required></label><br>
-                <button type="submit" id="submit-btn">Register Collector</button>
-            </form>
-        `;
-    } else if (role === 'citizen') {
-        formHTML = `
-            <h3>Citizen Registration</h3>
-            <form id="citizen-form">
-                ${commonFields}
-                <label>Bio Bin Capacity (kg):<br><input type="number" name="bioCapacity" min="0" required></label><br>
-                <label>Non-Bio Bin Capacity (kg):<br><input type="number" name="nonBioCapacity" min="0" required></label><br>
-                <button type="submit" id="submit-btn">Register Citizen</button>
-            </form>
-        `;
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    const registerUserForm = document.getElementById('registerUserForm');
+    const registerCollectorForm = document.getElementById('registerCollectorForm');
 
-    // Inject the dynamic form
-    formContainer.innerHTML = formHTML;
+    // Handle user registration
+    if (registerUserForm) {
+        registerUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const userLocation = document.getElementById('userLocation').value;
+            const bioCapacity = document.getElementById('bioCapacity').value;
+            const nonBioCapacity = document.getElementById('nonBioCapacity').value;
 
-    // Fetch location
-    getLocation();
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/register/user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        location: userLocation,
+                        bioCapacity: parseFloat(bioCapacity),
+                        nonBioCapacity: parseFloat(nonBioCapacity)
+                    }),
+                });
 
-    // Determine API base URL
-    const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-        ? 'http://localhost:5000'
-        : 'https://team-daa4sem.onrender.com';
-
-    const formId = role === 'collector' ? 'collector-form' : 'citizen-form';
-    const form = document.getElementById(formId);
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const locationInput = document.getElementById('location-input');
-        const locationValue = locationInput.value;
-
-        // Prevent form submission if location is not valid
-        if (!locationValue || locationValue.includes('error') || locationValue.includes('not supported') || locationValue.includes('Detecting')) {
-            alert('📍 Please allow location access and wait for location to load.');
-            return;
-        }
-
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        const endpoint = role === 'collector'
-            ? '/api/register/collector'
-            : '/api/register/user';
-
-        try {
-            const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-            const statusDiv = document.getElementById('status');
-
-            if (response.ok) {
-                // Modified: Display simple success message
-                statusDiv.textContent = `✅ Registered successfully!`;
-                form.reset();
-
-                // ADDED: Redirect to dashboard after successful citizen registration
-                if (role === 'citizen') {
-                    // You might want a slight delay or a confirmation before redirecting
-                    setTimeout(() => {
-                        window.location.href = 'citizen-dashboard.html';
-                    }, 1500); // Redirect after 1.5 seconds
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('User registered successfully!');
+                    console.log('User registration successful:', result);
+                    // Store user ID and bin IDs in localStorage for later use in dashboard.js
+                    localStorage.setItem('currentUserId', result.user);
+                    localStorage.setItem('currentBioBinId', result.bioBinId);
+                    localStorage.setItem('currentNonBioBinId', result.nonBioBinId);
+                    window.location.href = 'dashboard.html'; // Redirect to user dashboard
+                } else {
+                    const errorData = await response.json();
+                    alert(`User registration failed: ${errorData.error}`);
                 }
-                // For collectors, a dedicated dashboard or further instructions would be ideal.
-                // For now, they will just see the success message and remain on this page.
-
-            } else {
-                statusDiv.style.color = 'red';
-                statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
+            } catch (error) {
+                console.error('Error during user registration:', error);
+                alert('An error occurred during registration. Please try again.');
             }
-        } catch (err) {
-            alert('Network error: ' + err.message);
-        }
-    });
-}
-
-function getLocation() {
-    const locInput = document.getElementById('location-input');
-    if (!navigator.geolocation) {
-        if (locInput) locInput.value = 'Geolocation is not supported by your browser';
-        return;
+        });
     }
 
-    if (locInput) locInput.value = 'Detecting location...';
+    // Handle collector registration
+    if (registerCollectorForm) {
+        registerCollectorForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const collectorUsername = document.getElementById('collectorUsername').value;
+            const collectorLocation = document.getElementById('collectorLocation').value;
+            const truckCapacity = document.getElementById('truckCapacity').value;
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude } = position.coords;
-            if (locInput) locInput.value = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        },
-        (error) => {
-            if (locInput) locInput.value = `Error: ${error.message}`;
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
-        }
-    );
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/register/collector`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: collectorUsername,
+                        location: collectorLocation,
+                        truckCapacity: parseFloat(truckCapacity)
+                    }),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    alert('Collector registered successfully!');
+                    console.log('Collector registration successful:', result);
+                    // Store collector ID in localStorage if needed for collector-dashboard
+                    localStorage.setItem('currentCollectorId', result.collectorId);
+                    // *** IMPORTANT CHANGE HERE ***
+                    window.location.href = 'collector-dashboard.html'; // Redirect to collector dashboard
+                } else {
+                    const errorData = await response.json();
+                    alert(`Collector registration failed: ${errorData.error}`);
+                }
+            } catch (error) {
+                console.error('Error during collector registration:', error);
+                alert('An error occurred during registration. Please try again.');
+            }
+        });
+    }
+});
+
+// Function to handle getting current location (used by both user and collector registration forms)
+async function getCurrentLocation(inputId) {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+                document.getElementById(inputId).value = `${latitude},${longitude}`;
+                console.log(`Location set for ${inputId}: ${latitude},${longitude}`);
+            },
+            (error) => {
+                console.error("Error getting location:", error);
+                alert(`Unable to retrieve your location: ${error.message}. Please enter manually or try again.`);
+            }
+        );
+    } else {
+        alert("Geolocation is not supported by your browser.");
+    }
 }
