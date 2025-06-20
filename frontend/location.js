@@ -75,12 +75,11 @@ if (response.ok) {
   setTimeout(() => {
     window.location.href = "citizen-dashboard.html"; // 👈 Redirects to dashboard
   }, 1500);
+} else {
+  statusDiv.style.color = 'red';
+  statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
 }
 
-      } else {
-        statusDiv.style.color = 'red';
-        statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
-      }
     } catch (err) {
       alert('Network error: ' + err.message);
     }
