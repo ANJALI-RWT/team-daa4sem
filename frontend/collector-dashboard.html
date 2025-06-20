@@ -1,29 +1,55 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Collector Map (Leaflet + OSM)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>🚛 Collector Map View (Leaflet + Routing)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Leaflet Map Styles -->
   <link 
     rel="stylesheet" 
     href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha512-sA+z0JRWXnX5XQrKhNn6nU4Q0Fh6WDs+8Y08YvGjD1yLo9IPk6YqYQ4Cl7dXuN6yQ3v5X8GHFwpGV98EOD9aIA==" 
     crossorigin=""
   />
+
+  <!-- Routing Machine Styles -->
+  <link 
+    rel="stylesheet" 
+    href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" 
+  />
+
   <style>
     body, html { margin: 0; padding: 0; height: 100%; }
     #map { height: 100vh; width: 100%; }
-    h1 { text-align: center; margin: 0; padding: 10px; background: #f5f5f5; }
+    h1 {
+      margin: 0;
+      padding: 12px;
+      text-align: center;
+      background: #f0f0f0;
+      font-size: 1.5em;
+      font-family: sans-serif;
+    }
   </style>
 </head>
 <body>
 
-<h1>🚛 Collector Map View (Leaflet)</h1>
+<h1>🗺️ Collector Live Map (Smart Waste)</h1>
 <div id="map"></div>
 
+<!-- Leaflet Core -->
 <script 
   src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+  integrity="sha512-khZLzE3E0uWxZ3ACAAI+U2L0Dj1+0H3fILyg+R8OKgtsXOV6YvEo5FFLG+E+oxdZZNmAEOY/FeW4K7tRIl3ehQ==" 
   crossorigin="">
 </script>
 
+<!-- Leaflet Routing Machine -->
+<script 
+  src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js">
+</script>
+
+<!-- Your Map Logic -->
 <script src="collectorMap.js"></script>
+
 </body>
 </html>
