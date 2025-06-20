@@ -4,8 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>EcoAI Waste Management</title>
+
+  <!-- ✅ Styles -->
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <!-- ✅ Dependencies -->
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script defer src="dashboard.js"></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -22,6 +28,7 @@
   </aside>
 
   <main class="content-with-sidebar">
+    <!-- ✅ User Section -->
     <section id="user" class="card">
       <h1>User App</h1>
       <p>Scan barcode or upload waste image:</p>
@@ -31,16 +38,21 @@
 
       <!-- ✅ Barcode Scanner UI -->
       <video id="barcodeCam" autoplay muted style="width: 100%; max-width: 300px; margin-top: 10px; display: none;"></video>
-      <button class="btn" onclick="startBarcodeScanner()">📷 Start Barcode Camera</button>
+      <div style="margin-top: 10px;">
+        <button class="btn" onclick="startBarcodeScanner()">📷 Start Barcode Camera</button>
+        <button class="btn" onclick="stopBarcodeScanner()">❌ Cancel Scan</button>
+      </div>
 
       <div class="result-card" id="suggestionResult">Suggestion will appear here.</div>
     </section>
 
+    <!-- ✅ Smart Bins Section -->
     <section id="bins" class="card">
       <h1>Smart Bins</h1>
       <div class="bin-grid" id="binData"></div>
     </section>
 
+    <!-- ✅ AI Classification Section -->
     <section id="ai" class="card">
       <h1>AI Waste Detection</h1>
       <p>Upload image for AI-based waste classification:</p>
@@ -49,11 +61,13 @@
       <div class="result-card" id="aiResult">AI Prediction: Organic Waste</div>
     </section>
 
+    <!-- ✅ Truck Route Section -->
     <section id="trucks" class="card">
       <h1>Truck Route Optimization</h1>
       <div class="map-placeholder">🗺 Route Map Will Appear Here</div>
     </section>
 
+    <!-- ✅ Admin Dashboard Section -->
     <section id="admin" class="card">
       <h1>Admin Dashboard</h1>
       <table>
@@ -70,3 +84,5 @@
       </table>
     </section>
   </main>
+</body>
+</html>
