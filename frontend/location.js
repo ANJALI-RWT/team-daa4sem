@@ -1,3 +1,4 @@
+//location.js
 function registerRole(role) {
   const formContainer = document.getElementById('dynamic-form');
   let formHTML = '';
