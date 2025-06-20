@@ -1,69 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>🚛 Collector Map View (Leaflet + Routing)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ✅ Leaflet Map CSS -->
-  <link 
-    rel="stylesheet" 
+  <link
+    rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
     integrity="sha512-sA+z0JRWXnX5XQrKhNn6nU4Q0Fh6WDs+8Y08YvGjD1yLo9IPk6YqYQ4Cl7dXuN6yQ3v5X8GHFwpGV98EOD9aIA=="
     crossorigin=""
   />
 
-  <!-- ✅ Routing Machine CSS -->
-  <link 
-    rel="stylesheet" 
+  <link
+    rel="stylesheet"
     href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css"
   />
 
-  <!-- ✅ Custom Styles -->
   <style>
-    html, body {
-      height: 100%;
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; width: 100%; }
+    h1 {
       margin: 0;
-      font-family: sans-serif;
-    }
-
-    #map {
-      height: calc(100vh - 60px);
-      width: 100%;
-    }
-
-    header {
-      background-color: #f0f0f0;
-      padding: 15px;
-      font-size: 1.4em;
+      padding: 12px;
       text-align: center;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
+      background: #f0f0f0;
+      font-size: 1.5em;
+      font-family: sans-serif;
     }
   </style>
 </head>
 <body>
 
-  <!-- ✅ Page Header -->
-  <header>🗺️ Collector Live Map (Smart Waste)</header>
+<h1>🗺️ Collector Live Map (Smart Waste)</h1>
+<div id="map"></div>
 
-  <!-- ✅ Map Container -->
-  <div id="map"></div>
+<script
+  src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+  integrity="sha512-khZLzE3E0uWxZ3ACAAI+U2L0Dj1+0H3fILyg+R8OKgtsXOV6YvEo5FFLG+E+oxdZZNmAEOY/FeW4K7tRIl3ehQ=="
+  crossorigin="">
+</script>
 
-  <!-- ✅ Leaflet Core JS -->
-  <script 
-    src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-    integrity="sha512-khZLzE3E0uWxZ3ACAAI+U2L0Dj1+0H3fILyg+R8OKgtsXOV6YvEo5FFLG+E+oxdZZNmAEOY/FeW4K7tRIl3ehQ=="
-    crossorigin="">
-  </script>
+<script
+  src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js">
+</script>
 
-  <!-- ✅ Leaflet Routing Machine JS -->
-  <script 
-    src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.min.js">
-  </script>
-
-  <!-- ✅ Your Collector Map Logic -->
-  <script src="collectorMap.js"></script>
+<script src="collectorMap.js"></script>
 
 </body>
 </html>
