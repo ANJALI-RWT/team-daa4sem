@@ -50,9 +50,9 @@ const FullBin = mongoose.model('FullBin', fullBinSchema);
 
 /* ------------------ Routes ------------------ */
 
-// 🌱 Root Test
+// 🌱 Root
 app.get('/', (req, res) => {
-  res.send('🌱 Smart Waste Management Backend is running.');
+  res.send('🌿 Smart Waste Management API Running.');
 });
 
 // 📌 Register User
@@ -60,7 +60,7 @@ app.post('/api/register/user', async (req, res) => {
   try {
     const { username, location, bioCapacity, nonBioCapacity, zone } = req.body;
     if (!username || !location || bioCapacity == null || nonBioCapacity == null) {
-      return res.status(400).json({ error: 'Please provide all required fields.' });
+      return res.status(400).json({ error: 'All fields required.' });
     }
 
     const newUser = new User({
@@ -68,18 +68,14 @@ app.post('/api/register/user', async (req, res) => {
       location,
       bioCapacity,
       nonBioCapacity,
-      currentBioWeight: 0,
-      currentNonBioWeight: 0,
-      bioStatus: 'Okay',
-      nonBioStatus: 'Okay',
       zone: zone || 'Zone A'
     });
 
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(201).json({ message: 'User registered successfully.' });
+  } catch (err) {
+    console.error('Register User Error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
@@ -88,56 +84,65 @@ app.post('/api/register/collector', async (req, res) => {
   try {
     const { username, location, truckCapacity } = req.body;
     if (!username || !location || truckCapacity == null) {
-      return res.status(400).json({ error: 'Please provide all required fields.' });
+      return res.status(400).json({ error: 'All fields required.' });
     }
 
     const newCollector = new Collector({ username, location, truckCapacity });
     await newCollector.save();
-    res.status(201).json({ message: 'Collector registered successfully' });
-  } catch (error) {
-    console.error('Error registering collector:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(201).json({ message: 'Collector registered successfully.' });
+  } catch (err) {
+    console.error('Register Collector Error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ✅ Simulate Bin Fill + FullBin Logging
+// ✅ Simulate Bin Fill with Overflow Prevention
 app.post('/api/simulate-bin-fill', async (req, res) => {
   try {
     const { username, type, weight } = req.body;
     if (!username || !type || weight == null) {
-      return res.status(400).json({ error: 'Provide username, type, and weight.' });
+      return res.status(400).json({ error: 'Missing username/type/weight' });
     }
 
     const user = await User.findOne({ username });
     if (!user) return res.status(404).json({ error: 'User not found.' });
 
-    let newWeight = 0, capacity = 0, percent = 0, status = "Okay";
+    let current = 0, capacity = 0;
 
     if (type === 'Bio') {
-      const current = user.currentBioWeight || 0;
+      current = user.currentBioWeight;
       capacity = user.bioCapacity;
-      newWeight = current + weight;
-      percent = (newWeight / capacity) * 100;
-      status = percent >= 100 ? 'Needs Pickup' : 'Okay';
+    } else if (type === 'Non-Bio') {
+      current = user.currentNonBioWeight;
+      capacity = user.nonBioCapacity;
+    } else {
+      return res.status(400).json({ error: 'Invalid bin type' });
+    }
 
+    if (current >= capacity) {
+      return res.status(400).json({
+        error: `${type} bin is already full.`,
+        status: 'Needs Pickup',
+        weight: current,
+        percent: ((current / capacity) * 100).toFixed(1)
+      });
+    }
+
+    const newWeight = current + weight;
+    const percent = (newWeight / capacity) * 100;
+    const status = percent >= 100 ? 'Needs Pickup' : 'Okay';
+
+    if (type === 'Bio') {
       user.currentBioWeight = newWeight;
       user.bioStatus = status;
-    } else if (type === 'Non-Bio') {
-      const current = user.currentNonBioWeight || 0;
-      capacity = user.nonBioCapacity;
-      newWeight = current + weight;
-      percent = (newWeight / capacity) * 100;
-      status = percent >= 100 ? 'Needs Pickup' : 'Okay';
-
+    } else {
       user.currentNonBioWeight = newWeight;
       user.nonBioStatus = status;
-    } else {
-      return res.status(400).json({ error: 'Invalid bin type.' });
     }
 
     await user.save();
 
-    const [lat, lng] = user.location.split(',').map(coord => parseFloat(coord.trim()));
+    const [lat, lng] = user.location.split(',').map(Number);
 
     if (status === 'Needs Pickup') {
       await FullBin.updateOne(
@@ -145,56 +150,44 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
         { username, lat, lng, type },
         { upsert: true }
       );
-      console.log(`📣 Notify: ${type} bin for '${username}' is full at ${user.location}`);
+      console.log(`📍 Logged full ${type} bin for ${username}`);
     }
 
     res.json({
-      message: `✅ ${type} bin updated for ${username}`,
+      message: `${type} bin updated`,
       weight: newWeight,
       percent: percent.toFixed(1),
       status
     });
-  } catch (error) {
-    console.error('❌ simulate-bin-fill error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+
+  } catch (err) {
+    console.error('simulate-bin-fill error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ✅ Get All Full Bins
+// ✅ Full Bins Listing
 app.get('/api/full-bins', async (req, res) => {
   try {
-    const bins = await FullBin.find({});
+    const bins = await FullBin.find();
     res.json(bins);
-  } catch (error) {
-    console.error('Error fetching full bins:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// ✅ Get User by Username
-app.get('/api/get-user/:username', async (req, res) => {
-  try {
-    const username = req.params.username;
-    const user = await User.findOne({ username });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
   } catch (err) {
-    console.error('❌ Error fetching user:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('full-bins error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ✅ Confirm Collector Pickup (Corrected!)
+// ✅ Pickup Confirm
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
     if (!binId) return res.status(400).json({ error: 'Bin ID is required.' });
 
     const fullBin = await FullBin.findById(binId);
-    if (!fullBin) return res.status(404).json({ error: 'Full bin not found.' });
+    if (!fullBin) return res.status(404).json({ error: 'Bin not found.' });
 
     const user = await User.findOne({ username: fullBin.username });
-    if (!user) return res.status(404).json({ error: 'Associated user not found.' });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
 
     if (fullBin.type === 'Bio') {
       user.currentBioWeight = 0;
@@ -208,13 +201,25 @@ app.post('/api/pickup-confirm', async (req, res) => {
     await FullBin.deleteOne({ _id: binId });
 
     res.json({ message: `✅ ${fullBin.type} bin for ${user.username} has been cleared.` });
-  } catch (error) {
-    console.error('Error in pickup-confirm:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (err) {
+    console.error('pickup-confirm error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ✅ AI Classification (Mock)
+// ✅ User Bin Status
+app.get('/api/get-user/:username', async (req, res) => {
+  try {
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error('get-user error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ✅ AI Waste Classification (Mock)
 app.post('/api/classify-image', upload.single('image'), async (req, res) => {
   try {
     const file = req.file;
@@ -226,20 +231,20 @@ app.post('/api/classify-image', upload.single('image'), async (req, res) => {
 
     if (name.includes('plastic')) {
       waste_type = 'Plastic'; estimated_weight = 0.1;
-    } else if (name.includes('banana') || name.includes('veg') || name.includes('fruit')) {
-      waste_type = 'Organic'; estimated_weight = 3 + Math.random() * 2;
+    } else if (name.includes('banana') || name.includes('fruit') || name.includes('veg')) {
+      waste_type = 'Organic'; estimated_weight = 2 + Math.random() * 2;
     } else if (name.includes('paper')) {
       waste_type = 'Paper'; estimated_weight = 0.5;
     } else if (name.includes('metal')) {
-      waste_type = 'Metal'; estimated_weight = 2;
+      waste_type = 'Metal'; estimated_weight = 1.5;
     } else if (name.includes('glass')) {
-      waste_type = 'Glass'; estimated_weight = 4;
+      waste_type = 'Glass'; estimated_weight = 3.5;
     }
 
     res.json({ waste_type, estimated_weight });
-  } catch (error) {
-    console.error('❌ classify-image error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (err) {
+    console.error('classify-image error:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
