@@ -1,3 +1,4 @@
+//dashboard.js
 // 🚮 Bin State (per registered user)
 let bioBin = 0;
 let nonBioBin = 0;
