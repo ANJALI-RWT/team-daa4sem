@@ -28,10 +28,10 @@ function registerRole(role) {
     `;
   }
 
-  // Inject the dynamic form
+  // Inject the dynamic form into the page
   formContainer.innerHTML = formHTML;
 
-  // Fetch location
+  // Get user's location automatically
   getLocation();
 
   const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
@@ -70,7 +70,19 @@ function registerRole(role) {
       const statusDiv = document.getElementById('status');
 
       if (response.ok) {
+        // ✅ Store in sessionStorage
+        sessionStorage.setItem('username', data.username);
+
+        // Optional: store bin capacities for citizen
+        if (role === 'citizen') {
+          sessionStorage.setItem('bioCap', data.bioCapacity);
+          sessionStorage.setItem('nonBioCap', data.nonBioCapacity);
+        }
+
+        statusDiv.style.color = 'green';
         statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
+
+        // Redirect after delay
         setTimeout(() => {
           if (role === 'collector') {
             window.location.href = "collector-dashboard.html";
@@ -83,12 +95,12 @@ function registerRole(role) {
         statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
       }
     } catch (err) {
-      alert('Network error: ' + err.message);
+      alert('❌ Network error: ' + err.message);
     }
   });
 }
 
-// This must be **outside** of the registerRole function
+// 📍 Geolocation Fetch Function
 function getLocation() {
   const locInput = document.getElementById('location-input');
   if (!navigator.geolocation) {
