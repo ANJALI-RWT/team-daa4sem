@@ -3,6 +3,8 @@ let bioBin = 0;
 let nonBioBin = 0;
 let bioCapacity = 10;
 let nonBioCapacity = 15;
+let lastBioPickup = null; // New variable to store last bio pickup date
+let lastNonBioPickup = null; // New variable to store last non-bio pickup date
 
 const API_BASE = 'https://team-daa4sem.onrender.com';
 
@@ -30,11 +32,16 @@ async function fetchBinState() {
     bioCapacity = data.bioCapacity || 10;
     nonBioCapacity = data.nonBioCapacity || 15;
 
+    // Store the last pickup dates if available
+    lastBioPickup = data.lastBioPickup;
+    lastNonBioPickup = data.lastNonBioPickup;
+
     sessionStorage.setItem("bioCap", bioCapacity);
     sessionStorage.setItem("nonBioCap", nonBioCapacity);
 
     updateBins();
-    updateAdminTable(); // Keep this if the admin table is on the same dashboard, otherwise remove.
+    // Pass the entire user data to updateAdminTable
+    updateAdminTable(data);
   } catch (err) {
     console.error("❌ Failed to fetch user bin state:", err);
   }
@@ -69,28 +76,36 @@ function updateBins() {
   `;
 }
 
-// 📊 Admin Table Update - Assuming this is part of the citizen dashboard for some reason.
-// If this is only for the actual admin panel, remove it from dashboard.js and put it in admin-dashboard.js
-function updateAdminTable() {
+// 📊 Admin Table Update - Now accepts user data to display last pickup dates
+function updateAdminTable(userData) {
   const adminTableBody = document.getElementById('adminTableBody');
   if (!adminTableBody) return; // Prevent error if element doesn't exist on this page
 
   const bioPercent = Math.min(100, (bioBin / bioCapacity) * 100);
   const nonBioPercent = Math.min(100, (nonBioBin / nonBioCapacity) * 100);
 
+  // Determine last pickup dates, default to 'N/A' if not set
+  const bioPickupDate = userData && userData.lastBioPickup
+    ? new Date(userData.lastBioPickup).toLocaleDateString()
+    : 'N/A';
+  const nonBioPickupDate = userData && userData.lastNonBioPickup
+    ? new Date(userData.lastNonBioPickup).toLocaleDateString()
+    : 'N/A';
+
+  // Assuming this table is for the current logged-in user's bins
   adminTableBody.innerHTML = `
     <tr>
-      <td>Zone A</td>
-      <td>#101</td>
+      <td>${userData.zone || 'Zone A'}</td>
+      <td>Bio Bin</td>
       <td>${bioPercent.toFixed(0)}%</td>
-      <td>${new Date().toISOString().slice(0, 10)}</td>
+      <td>${bioPickupDate}</td>
       <td class="status ${bioPercent >= 80 ? 'critical' : 'ok'}">${bioPercent >= 80 ? 'Needs Pickup' : 'Okay'}</td>
     </tr>
     <tr>
-      <td>Zone B</td>
-      <td>#102</td>
+      <td>${userData.zone || 'Zone A'}</td>
+      <td>Non-Bio Bin</td>
       <td>${nonBioPercent.toFixed(0)}%</td>
-      <td>${new Date().toISOString().slice(0, 10)}</td>
+      <td>${nonBioPickupDate}</td>
       <td class="status ${nonBioPercent >= 80 ? 'critical' : 'ok'}">${nonBioPercent >= 80 ? 'Needs Pickup' : 'Okay'}</td>
     </tr>
   `;
@@ -155,7 +170,10 @@ async function processWaste(result, suggestionDiv) {
     nonBioBin += weight;
   }
   updateBins();
-  updateAdminTable();
+  // We need to re-fetch to get the updated lastPickup date from the server.
+  // Instead of calling updateAdminTable directly here, fetchBinState will do it
+  // after getting fresh data.
+  // updateAdminTable(); // This line is now removed from here
 
   // Then send to backend
   try {
@@ -183,7 +201,9 @@ async function processWaste(result, suggestionDiv) {
   } catch (err) {
     console.error("Error updating bin on backend:", err);
     suggestionDiv.textContent = `❌ Server update failed: ${err.message}`;
-    // Revert frontend state if backend update fails, or fetch current state again
+  } finally {
+    // Always fetch bin state after attempting to add waste to refresh all UI elements
+    // including the admin table with potentially updated pickup dates.
     fetchBinState();
   }
 }
