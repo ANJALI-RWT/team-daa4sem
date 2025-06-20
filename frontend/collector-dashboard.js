@@ -1,3 +1,4 @@
+//frontend/collector-dashboard.js
 const API_BASE = 'https://team-daa4sem.onrender.com';
 let map;
 let binMarkers = [];
