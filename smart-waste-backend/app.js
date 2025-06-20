@@ -2,6 +2,8 @@ require('dotenv').config(); // Load environment variables
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const multer = require('multer'); // ✅ Required for image uploads
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,7 +89,7 @@ app.post('/api/register/collector', async (req, res) => {
   }
 });
 
-/* ------------------ Full Bin APIs ------------------ */
+/* ------------------ Bin Monitoring APIs ------------------ */
 
 // ✅ GET full bins (100% full)
 app.get('/api/full-bins', async (req, res) => {
@@ -136,8 +138,7 @@ app.post('/api/pickup-confirm', async (req, res) => {
   }
 });
 
-/* ------------------ OPTIONAL: Simulate Bin Fill ------------------ */
-// Simulate adding waste to a user’s bin
+/* ------------------ Simulate Bin Fill (Test Route) ------------------ */
 app.post('/api/simulate-bin-fill', async (req, res) => {
   try {
     const { username, type, weight } = req.body;
@@ -157,14 +158,41 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
     }
 
     await user.save();
-    res.json({ message: `Added ${weight}kg to ${type} bin for ${username}.` });
+    res.json({ message: `✅ Added ${weight}kg to ${type} bin for ${username}.` });
   } catch (error) {
     console.error('Error in simulate-bin-fill:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-/* ------------------ Server Start ------------------ */
+/* ------------------ ✅ AI Classification Route ------------------ */
+app.post('/api/classify-image', upload.single('image'), async (req, res) => {
+  try {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+
+    // 📦 MOCK AI: Auto-classify based on filename
+    const name = file.originalname.toLowerCase();
+    let waste_type = 'Unknown';
+    let estimated_weight = 0.2;
+
+    if (name.includes('plastic')) waste_type = 'Plastic';
+    else if (name.includes('banana') || name.includes('veg') || name.includes('food')) waste_type = 'Organic';
+    else if (name.includes('paper')) waste_type = 'Paper';
+    else if (name.includes('metal')) waste_type = 'Metal';
+    else if (name.includes('glass')) waste_type = 'Glass';
+
+    return res.json({ waste_type, estimated_weight });
+  } catch (error) {
+    console.error('❌ AI classify failed:', error);
+    res.status(500).json({ error: 'AI classification failed' });
+  }
+});
+
+/* ------------------ Start Server ------------------ */
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
