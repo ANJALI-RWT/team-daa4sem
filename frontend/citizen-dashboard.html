@@ -28,6 +28,11 @@
       <input type="text" id="barcodeInput" placeholder="Scan Barcode..." class="input" />
       <input type="file" id="uploadInput" accept="image/*" class="input" />
       <button class="btn" id="suggestBtn">Get Recycling Suggestion</button>
+
+      <!-- ✅ Barcode Scanner UI -->
+      <video id="barcodeCam" autoplay muted style="width: 100%; max-width: 300px; margin-top: 10px; display: none;"></video>
+      <button class="btn" onclick="startBarcodeScanner()">📷 Start Barcode Camera</button>
+
       <div class="result-card" id="suggestionResult">Suggestion will appear here.</div>
     </section>
 
@@ -61,26 +66,7 @@
             <th>Status</th>
           </tr>
         </thead>
-        <tbody id="adminTableBody">
-          <tr>
-            <td>Zone A</td>
-            <td>#102</td>
-            <td>0%</td>
-            <td>2025-05-16</td>
-            <td class="status critical">Needs Pickup</td>
-          </tr>
-          <tr>
-            <td>Zone B</td>
-            <td>#203</td>
-            <td>0%</td>
-            <td>2025-05-15</td>
-            <td class="status ok">Okay</td>
-          </tr>
-        </tbody>
+        <tbody id="adminTableBody"></tbody>
       </table>
     </section>
   </main>
-
-  <script src="dashboard.js"></script>
-</body>
-</html>
