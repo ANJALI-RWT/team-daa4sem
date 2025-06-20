@@ -8,11 +8,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connection
+// 🔗 MongoDB Connection
 const mongoURI = process.env.MONGODB_URI;
 mongoose.connect(mongoURI)
   .then(() => console.log('✅ MongoDB connected'))
@@ -21,14 +20,15 @@ mongoose.connect(mongoURI)
 /* ------------------ Schema Definitions ------------------ */
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
-  location: { type: String, required: true }, // "lat,lng"
+  location: { type: String, required: true },
   bioCapacity: { type: Number, required: true, min: 0 },
   nonBioCapacity: { type: Number, required: true, min: 0 },
   currentBioWeight: { type: Number, default: 0 },
   currentNonBioWeight: { type: Number, default: 0 },
   bioStatus: { type: String, default: 'Okay' },
   nonBioStatus: { type: String, default: 'Okay' },
-  zone: { type: String, default: 'Zone A' }
+  zone: { type: String, default: 'Zone A' },
+  lastPickup: { type: Date } // ✅ New field added
 });
 
 const collectorSchema = new mongoose.Schema({
@@ -128,7 +128,9 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
       });
     }
 
-    const newWeight = current + weight;
+    const spaceLeft = capacity - current;
+    const safeWeight = Math.min(weight, spaceLeft);
+    const newWeight = current + safeWeight;
     const percent = (newWeight / capacity) * 100;
     const status = percent >= 100 ? 'Needs Pickup' : 'Okay';
 
@@ -155,6 +157,7 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
 
     res.json({
       message: `${type} bin updated`,
+      added: safeWeight,
       weight: newWeight,
       percent: percent.toFixed(1),
       status
@@ -177,7 +180,7 @@ app.get('/api/full-bins', async (req, res) => {
   }
 });
 
-// ✅ Pickup Confirm
+// ✅ Pickup Confirm with lastPickup update
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
@@ -197,6 +200,7 @@ app.post('/api/pickup-confirm', async (req, res) => {
       user.nonBioStatus = 'Okay';
     }
 
+    user.lastPickup = new Date(); // ✅ Track pickup time
     await user.save();
     await FullBin.deleteOne({ _id: binId });
 
@@ -207,12 +211,12 @@ app.post('/api/pickup-confirm', async (req, res) => {
   }
 });
 
-// ✅ User Bin Status
+// ✅ User Bin Status (with lastPickup)
 app.get('/api/get-user/:username', async (req, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
+    res.json(user); // Includes lastPickup in response
   } catch (err) {
     console.error('get-user error:', err);
     res.status(500).json({ error: 'Server error' });
