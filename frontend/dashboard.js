@@ -93,7 +93,7 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       suggestionDiv.textContent = `♻️ Detected Waste Type: ${result.waste_type}. Recycle as ${result.waste_type} Waste.`;
 
       const weight = result.estimated_weight || 0.2;
-      const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+      const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
       if (type === 'Bio') bioBin += weight;
       else nonBioBin += weight;
@@ -101,7 +101,6 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       updateBins();
       updateAdminTable();
 
-      // ✅ Update MongoDB bin state
       await fetch(`${API_BASE}/api/simulate-bin-fill`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,7 +123,7 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       suggestionDiv.textContent = `♻️ AI Detected Waste Type: ${result.waste_type}.`;
 
       const weight = result.estimated_weight || 0.2;
-      const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+      const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
       if (type === 'Bio') bioBin += weight;
       else nonBioBin += weight;
@@ -132,7 +131,6 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       updateBins();
       updateAdminTable();
 
-      // ✅ Update MongoDB bin state
       await fetch(`${API_BASE}/api/simulate-bin-fill`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -170,7 +168,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     aiResult.textContent = `♻️ Detected Waste Type: ${result.waste_type}.`;
 
     const weight = result.estimated_weight || 0.2;
-    const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+    const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
     if (type === 'Bio') bioBin += weight;
     else nonBioBin += weight;
@@ -178,7 +176,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     updateBins();
     updateAdminTable();
 
-    // ✅ Update MongoDB bin state
     await fetch(`${API_BASE}/api/simulate-bin-fill`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
