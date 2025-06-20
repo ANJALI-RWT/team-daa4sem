@@ -93,11 +93,25 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       suggestionDiv.textContent = `♻️ Detected Waste Type: ${result.waste_type}. Recycle as ${result.waste_type} Waste.`;
 
       const weight = result.estimated_weight || 0.2;
-      if (result.waste_type.toLowerCase() === 'organic') bioBin += weight;
+      const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+
+      if (type === 'Bio') bioBin += weight;
       else nonBioBin += weight;
 
       updateBins();
       updateAdminTable();
+
+      // ✅ Update MongoDB bin state
+      await fetch(`${API_BASE}/api/simulate-bin-fill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: sessionStorage.getItem('username'),
+          type: type,
+          weight: weight
+        })
+      });
+
     } catch (err) {
       console.error(err);
       suggestionDiv.textContent = '❌ Barcode lookup failed.';
@@ -110,11 +124,25 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       suggestionDiv.textContent = `♻️ AI Detected Waste Type: ${result.waste_type}.`;
 
       const weight = result.estimated_weight || 0.2;
-      if (result.waste_type.toLowerCase() === 'organic') bioBin += weight;
+      const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+
+      if (type === 'Bio') bioBin += weight;
       else nonBioBin += weight;
 
       updateBins();
       updateAdminTable();
+
+      // ✅ Update MongoDB bin state
+      await fetch(`${API_BASE}/api/simulate-bin-fill`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: sessionStorage.getItem('username'),
+          type: type,
+          weight: weight
+        })
+      });
+
     } catch (err) {
       console.error(err);
       suggestionDiv.textContent = '❌ Image classification failed.';
@@ -142,11 +170,25 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     aiResult.textContent = `♻️ Detected Waste Type: ${result.waste_type}.`;
 
     const weight = result.estimated_weight || 0.2;
-    if (result.waste_type.toLowerCase() === 'organic') bioBin += weight;
+    const type = result.waste_type.toLowerCase() === 'organic' ? 'Bio' : 'Non-Bio';
+
+    if (type === 'Bio') bioBin += weight;
     else nonBioBin += weight;
 
     updateBins();
     updateAdminTable();
+
+    // ✅ Update MongoDB bin state
+    await fetch(`${API_BASE}/api/simulate-bin-fill`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: sessionStorage.getItem('username'),
+        type: type,
+        weight: weight
+      })
+    });
+
   } catch (error) {
     console.error(error);
     aiResult.textContent = '❌ AI classification failed.';
