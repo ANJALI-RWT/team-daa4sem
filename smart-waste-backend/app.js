@@ -177,13 +177,33 @@ app.post('/api/classify-image', upload.single('image'), async (req, res) => {
     // 📦 MOCK AI: Auto-classify based on filename
     const name = file.originalname.toLowerCase();
     let waste_type = 'Unknown';
-    let estimated_weight = 0.2;
+    let estimated_weight = 0.2; // default
 
-    if (name.includes('plastic')) waste_type = 'Plastic';
-    else if (name.includes('banana') || name.includes('veg') || name.includes('food')) waste_type = 'Organic';
-    else if (name.includes('paper')) waste_type = 'Paper';
-    else if (name.includes('metal')) waste_type = 'Metal';
-    else if (name.includes('glass')) waste_type = 'Glass';
+    if (name.includes('plastic')) {
+      waste_type = 'Plastic';
+      estimated_weight = 0.1; // very light
+    }
+    else if (
+      name.includes('banana') ||
+      name.includes('veg') ||
+      name.includes('food') ||
+      name.includes('fruit')
+    ) {
+      waste_type = 'Organic';
+      estimated_weight = 3 + Math.random() * 2; // 3–5 kg
+    }
+    else if (name.includes('paper')) {
+      waste_type = 'Paper';
+      estimated_weight = 0.5;
+    }
+    else if (name.includes('metal')) {
+      waste_type = 'Metal';
+      estimated_weight = 2;
+    }
+    else if (name.includes('glass')) {
+      waste_type = 'Glass';
+      estimated_weight = 4;
+    }
 
     return res.json({ waste_type, estimated_weight });
   } catch (error) {
@@ -191,6 +211,7 @@ app.post('/api/classify-image', upload.single('image'), async (req, res) => {
     res.status(500).json({ error: 'AI classification failed' });
   }
 });
+
 
 /* ------------------ Start Server ------------------ */
 app.listen(PORT, () => {
