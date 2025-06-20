@@ -1,4 +1,4 @@
-//smart-waste-backend/app.js
+// smart-waste-backend/app.js
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
   currentNonBioWeight: { type: Number, default: 0 },
   bioStatus: { type: String, default: 'Okay' },
   nonBioStatus: { type: String, default: 'Okay' },
-  zone: { type: String, default: 'Zone A' } // optional but useful
+  zone: { type: String, default: 'Zone A' }
 });
 
 const collectorSchema = new mongoose.Schema({
@@ -43,7 +43,7 @@ const Collector = mongoose.model('Collector', collectorSchema);
 
 /* ------------------ Routes ------------------ */
 
-// Root Test
+// 🌱 Root Test
 app.get('/', (req, res) => {
   res.send('🌱 Smart Waste Management Backend is running.');
 });
@@ -133,7 +133,6 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
 
     await user.save();
 
-    // 🔔 Optional logging
     if (status === 'Needs Pickup') {
       console.log(`📣 Notify: ${type} bin for '${username}' is full at ${user.location}`);
     }
@@ -151,7 +150,20 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
   }
 });
 
-// ✅ Get Full Bins for Map
+// ✅ Get User by Username (used by dashboard.js to fetch bin state)
+app.get('/api/get-user/:username', async (req, res) => {
+  try {
+    const username = req.params.username;
+    const user = await User.findOne({ username });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error('❌ Error fetching user:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ✅ Get All Full Bins for Collector Map
 app.get('/api/full-bins', async (req, res) => {
   try {
     const fullUsers = await User.find({
@@ -180,7 +192,7 @@ app.get('/api/full-bins', async (req, res) => {
   }
 });
 
-// ✅ Confirm Collector Pickup (Reset Both Bins)
+// ✅ Confirm Collector Pickup (Reset Bins)
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
@@ -202,7 +214,7 @@ app.post('/api/pickup-confirm', async (req, res) => {
   }
 });
 
-// ✅ Mock AI Classification
+// ✅ Mock AI Image Classification
 app.post('/api/classify-image', upload.single('image'), async (req, res) => {
   try {
     const file = req.file;
@@ -231,7 +243,7 @@ app.post('/api/classify-image', upload.single('image'), async (req, res) => {
   }
 });
 
-// Start Server
+// ✅ Start Server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
