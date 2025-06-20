@@ -73,18 +73,14 @@ function registerRole(role) {
 if (response.ok) {
   statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
   setTimeout(() => {
-    window.location.href = "citizen-dashboard.html"; // 👈 Redirects to dashboard
+    if (role === 'collector') {
+      window.location.href = "collector-dashboard.html";
+    } else {
+      window.location.href = "citizen-dashboard.html";
+    }
   }, 1500);
-} else {
-  statusDiv.style.color = 'red';
-  statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
 }
 
-    } catch (err) {
-      alert('Network error: ' + err.message);
-    }
-  });
-}
 
 function getLocation() {
   const locInput = document.getElementById('location-input');
