@@ -2,16 +2,7 @@ let map, collectorMarker, routeLine;
 let fullBins = [];
 let currentPosition = null;
 
-// Initialize map
-function initMap(lat, lng) {
-  map = L.map('map').setView([lat, lng], 15);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
-  }).addTo(map);
-
-  collectorMarker = L.marker([lat, lng], { title: 'You', icon: blueIcon }).addTo(map);
-  loadBinsAndRoute(lat, lng);
-}
+const API_BASE = location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://team-daa4sem.onrender.com';
 
 // Custom icons
 const redIcon = L.icon({
@@ -23,9 +14,36 @@ const blueIcon = L.icon({
   iconSize: [25, 25]
 });
 
-// Load full bins from backend
+// Load collector info from sessionStorage (or set manually for demo)
+const collectorName = sessionStorage.getItem('collectorName') || 'Demo Collector';
+const truckCapacity = sessionStorage.getItem('truckCapacity') || '4';
+
+// Update interface with collector info
+document.getElementById('collectorName').textContent = collectorName;
+document.getElementById('truckCapacity').textContent = truckCapacity;
+
+// 🌍 Geolocation
+navigator.geolocation.getCurrentPosition(pos => {
+  currentPosition = pos.coords;
+  document.getElementById('collectorLocation').textContent = `${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`;
+  initMap(pos.coords.latitude, pos.coords.longitude);
+}, err => {
+  alert('📍 Location access is required.');
+});
+
+// 🗺️ Init Leaflet Map
+function initMap(lat, lng) {
+  map = L.map('map').setView([lat, lng], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  collectorMarker = L.marker([lat, lng], { icon: blueIcon }).addTo(map);
+  loadBinsAndRoute(lat, lng);
+}
+
+// 📡 Load full bins
 async function loadBinsAndRoute(lat, lng) {
-  const API_BASE = location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://team-daa4sem.onrender.com';
   const res = await fetch(`${API_BASE}/api/full-bins`);
   fullBins = await res.json();
 
@@ -33,7 +51,7 @@ async function loadBinsAndRoute(lat, lng) {
     const marker = L.marker([bin.lat, bin.lng], { icon: redIcon }).addTo(map);
     marker.bindPopup(`
       🟥 <b>Full Bin</b><br>Type: ${bin.type}<br>Bin ID: ${bin.id}<br>
-      <button class="btn-pickup" onclick="pickupBin('${bin.id}')">Pickup Done</button>
+      <button class="btn-pickup" onclick="pickupBin('${bin.id}')">✅ Pickup Done</button>
     `);
   });
 
@@ -42,7 +60,7 @@ async function loadBinsAndRoute(lat, lng) {
   }
 }
 
-// Route using polyline
+// 📏 Route to nearest bin (basic polyline)
 function drawRouteToNearestBin(lat, lng, bins) {
   let nearest = bins[0];
   let minDist = Infinity;
@@ -55,12 +73,23 @@ function drawRouteToNearestBin(lat, lng, bins) {
     }
   });
 
-  // Simulate route with polyline (replace with OSRM for real road routing)
   if (routeLine) map.removeLayer(routeLine);
   routeLine = L.polyline([[lat, lng], [nearest.lat, nearest.lng]], { color: 'blue' }).addTo(map);
 }
 
-// Haversine formula to find distance
+// 📦 Confirm pickup
+async function pickupBin(binId) {
+  await fetch(`${API_BASE}/api/pickup-confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ binId })
+  });
+
+  alert(`✅ Bin ${binId} marked as collected.`);
+  location.reload();
+}
+
+// 🧮 Distance calculation
 function getDistance(lat1, lon1, lat2, lon2) {
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI/180;
@@ -71,23 +100,3 @@ function getDistance(lat1, lon1, lat2, lon2) {
             Math.sin(dLon/2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
-
-// Confirm pickup → reset bin
-async function pickupBin(binId) {
-  const API_BASE = location.hostname === 'localhost' ? 'http://localhost:5000' : 'https://team-daa4sem.onrender.com';
-  await fetch(`${API_BASE}/api/pickup-confirm`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ binId })
-  });
-  alert(`✅ Bin ${binId} pickup confirmed.`);
-  location.reload();
-}
-
-// Get live location
-navigator.geolocation.getCurrentPosition(pos => {
-  currentPosition = pos.coords;
-  initMap(pos.coords.latitude, pos.coords.longitude);
-}, err => {
-  alert('📍 Location access required.');
-});
