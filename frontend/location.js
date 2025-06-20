@@ -34,7 +34,6 @@ function registerRole(role) {
   // Fetch location
   getLocation();
 
-  // Determine API base URL
   const API_BASE_URL = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
     ? 'http://localhost:5000'
     : 'https://team-daa4sem.onrender.com';
@@ -48,7 +47,6 @@ function registerRole(role) {
     const locationInput = document.getElementById('location-input');
     const locationValue = locationInput.value;
 
-    // Prevent form submission if location is not valid
     if (!locationValue || locationValue.includes('error') || locationValue.includes('not supported') || locationValue.includes('Detecting')) {
       alert('📍 Please allow location access and wait for location to load.');
       return;
@@ -70,18 +68,27 @@ function registerRole(role) {
 
       const result = await response.json();
       const statusDiv = document.getElementById('status');
-if (response.ok) {
-  statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
-  setTimeout(() => {
-    if (role === 'collector') {
-      window.location.href = "collector-dashboard.html";
-    } else {
-      window.location.href = "citizen-dashboard.html";
+
+      if (response.ok) {
+        statusDiv.textContent = `✅ Registered successfully: ${JSON.stringify(result)}`;
+        setTimeout(() => {
+          if (role === 'collector') {
+            window.location.href = "collector-dashboard.html";
+          } else {
+            window.location.href = "citizen-dashboard.html";
+          }
+        }, 1500);
+      } else {
+        statusDiv.style.color = 'red';
+        statusDiv.textContent = `❌ Error: ${result.message || 'Registration failed'}`;
+      }
+    } catch (err) {
+      alert('Network error: ' + err.message);
     }
-  }, 1500);
+  });
 }
 
-
+// This must be **outside** of the registerRole function
 function getLocation() {
   const locInput = document.getElementById('location-input');
   if (!navigator.geolocation) {
