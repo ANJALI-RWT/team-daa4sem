@@ -1,5 +1,5 @@
 // smart-waste-backend/app.js
-require('dotenv').config();
+""require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -38,8 +38,16 @@ const collectorSchema = new mongoose.Schema({
   truckCapacity: { type: Number, required: true, min: 1 }
 });
 
+const fullBinSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  lat: Number,
+  lng: Number,
+  type: String
+});
+
 const User = mongoose.model('User', userSchema);
 const Collector = mongoose.model('Collector', collectorSchema);
+const FullBin = mongoose.model('FullBin', fullBinSchema);
 
 /* ------------------ Routes ------------------ */
 
@@ -93,7 +101,7 @@ app.post('/api/register/collector', async (req, res) => {
   }
 });
 
-// ✅ Simulate Bin Fill + Auto Status
+// ✅ Simulate Bin Fill + Auto Status + FullBin Logging
 app.post('/api/simulate-bin-fill', async (req, res) => {
   try {
     const { username, type, weight } = req.body;
@@ -133,7 +141,14 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
 
     await user.save();
 
+    const [lat, lng] = user.location.split(',').map(coord => parseFloat(coord.trim()));
+
     if (status === 'Needs Pickup') {
+      await FullBin.updateOne(
+        { username },
+        { username, lat, lng, type },
+        { upsert: true }
+      );
       console.log(`📣 Notify: ${type} bin for '${username}' is full at ${user.location}`);
     }
 
@@ -150,7 +165,7 @@ app.post('/api/simulate-bin-fill', async (req, res) => {
   }
 });
 
-// ✅ Get User by Username (used by dashboard.js to fetch bin state)
+// ✅ Get User by Username
 app.get('/api/get-user/:username', async (req, res) => {
   try {
     const username = req.params.username;
@@ -163,28 +178,10 @@ app.get('/api/get-user/:username', async (req, res) => {
   }
 });
 
-// ✅ Get All Full Bins for Collector Map
+// ✅ Get All Full Bins
 app.get('/api/full-bins', async (req, res) => {
   try {
-    const fullUsers = await User.find({
-      $or: [
-        { bioStatus: "Needs Pickup" },
-        { nonBioStatus: "Needs Pickup" }
-      ]
-    });
-
-    const bins = fullUsers.map(user => {
-      const [lat, lng] = user.location.split(',').map(coord => parseFloat(coord.trim()));
-      return {
-        id: user._id,
-        lat,
-        lng,
-        type: user.bioStatus === 'Needs Pickup' ? 'Bio' : 'Non-Bio',
-        username: user.username,
-        zone: user.zone
-      };
-    });
-
+    const bins = await FullBin.find({});
     res.json(bins);
   } catch (error) {
     console.error('Error fetching full bins:', error);
@@ -192,7 +189,7 @@ app.get('/api/full-bins', async (req, res) => {
   }
 });
 
-// ✅ Confirm Collector Pickup (Reset Bins)
+// ✅ Confirm Collector Pickup
 app.post('/api/pickup-confirm', async (req, res) => {
   try {
     const { binId } = req.body;
@@ -207,6 +204,8 @@ app.post('/api/pickup-confirm', async (req, res) => {
     user.nonBioStatus = 'Okay';
     await user.save();
 
+    await FullBin.deleteOne({ username: user.username });
+
     res.json({ message: `✅ Bin for ${user.username} has been cleared.` });
   } catch (error) {
     console.error('Error in pickup-confirm:', error);
@@ -214,7 +213,7 @@ app.post('/api/pickup-confirm', async (req, res) => {
   }
 });
 
-// ✅ Mock AI Image Classification
+// ✅ Mock AI Classification
 app.post('/api/classify-image', upload.single('image'), async (req, res) => {
   try {
     const file = req.file;
