@@ -2,70 +2,31 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Collector Dashboard</title>
-
   <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 80vh; width: 100%; margin: 20px auto; }
-    .btn-pickup { background-color: green; color: white; padding: 6px 12px; border: none; margin-top: 5px; }
-    #barcodeCam { width: 300px; display: block; margin: 10px auto; }
-    #scanner-area { text-align: center; margin-bottom: 20px; }
+    #map { height: 400px; border-radius: 10px; margin-top: 10px; }
+    .collector-info { background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+    .btn-pickup { background-color: #4caf50; color: white; border: none; padding: 5px 10px; margin-top: 5px; cursor: pointer; border-radius: 4px; }
   </style>
 </head>
-
 <body>
-  <h1 style="text-align:center;">🚛 Waste Collector Dashboard</h1>
 
-  <!-- Optional barcode scanner section -->
-  <div id="scanner-area">
-    <input type="text" id="barcodeInput" placeholder="Barcode will appear here" />
-    <button id="startScanBtn">📷 Start Scan</button>
-    <video id="barcodeCam" autoplay muted></video>
-  </div>
+  <main style="padding: 20px; max-width: 1000px; margin: auto;">
+    <h1>🚛 Collector Dashboard</h1>
 
-  <div id="map"></div>
+    <div class="collector-info">
+      <p><strong>👷 Collector:</strong> <span id="collectorName">Loading...</span></p>
+      <p><strong>📍 Location:</strong> <span id="collectorLocation">Detecting...</span></p>
+      <p><strong>🚛 Truck Capacity:</strong> <span id="truckCapacity">--</span> tons</p>
+    </div>
 
-  <!-- Barcode scanner script -->
-  <script>
-    function startBarcodeScanner() {
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#barcodeCam"),
-          constraints: {
-            facingMode: "environment"
-          }
-        },
-        decoder: {
-          readers: ["ean_reader", "upc_reader", "code_128_reader"]
-        }
-      }, function (err) {
-        if (err) {
-          console.error("Quagga init error:", err);
-          return;
-        }
-        Quagga.start();
-      });
+    <div id="map"></div>
+  </main>
 
-      Quagga.onDetected(function (result) {
-        const code = result.codeResult.code;
-        document.getElementById("barcodeInput").value = code;
-        Quagga.stop(); // stop after first scan
-        alert("✅ Detected barcode: " + code);
-      });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("startScanBtn").addEventListener("click", startBarcodeScanner);
-    });
-  </script>
-
-  <script src="collector-map.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="collector.js"></script>
 </body>
 </html>
