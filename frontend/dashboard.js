@@ -46,12 +46,12 @@ function updateBins() {
     <div class="bin">
       <h3>Bio Bin</h3>
       <div class="bar" style="height: ${bioPercent * 2}px;"></div>
-      <div>${bioBin.toFixed(1)} / ${bioCapacity} kg (${bioPercent.toFixed(0)}%)</div>
+      <div>${Math.min(bioBin, bioCapacity).toFixed(1)} / ${bioCapacity} kg (${bioPercent.toFixed(0)}%)</div>
     </div>
     <div class="bin">
       <h3>Non-Bio Bin</h3>
       <div class="bar" style="height: ${nonBioPercent * 2}px;"></div>
-      <div>${nonBioBin.toFixed(1)} / ${nonBioCapacity} kg (${nonBioPercent.toFixed(0)}%)</div>
+      <div>${Math.min(nonBioBin, nonBioCapacity).toFixed(1)} / ${nonBioCapacity} kg (${nonBioPercent.toFixed(0)}%)</div>
     </div>
   `;
 }
@@ -86,7 +86,7 @@ async function lookupBarcode(barcode) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ barcode })
   });
-  return await res.json(); // { waste_type, estimated_weight }
+  return await res.json();
 }
 
 // 🧠 AI Classification API
@@ -101,7 +101,7 @@ async function sendToAI(file) {
 
   if (!response.ok) throw new Error("AI classification failed");
 
-  return await response.json(); // { waste_type, estimated_weight }
+  return await response.json();
 }
 
 // 📦 Suggestion Button Click
@@ -114,13 +114,19 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
     try {
       suggestionDiv.textContent = '🔎 Looking up barcode...';
       const result = await lookupBarcode(barcode);
-      suggestionDiv.textContent = `♻️ Detected Waste Type: ${result.waste_type}. Recycle as ${result.waste_type} Waste.`;
+      suggestionDiv.textContent = `♻️ Detected Waste Type: ${result.waste_type}.`;
 
       const weight = result.estimated_weight || 0.2;
       const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
-      if (type === 'Bio') bioBin += weight;
-      else nonBioBin += weight;
+      // ✅ Prevent overflow
+      if (type === 'Bio') {
+        if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
+        bioBin += weight;
+      } else {
+        if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
+        nonBioBin += weight;
+      }
 
       updateBins();
       updateAdminTable();
@@ -149,8 +155,14 @@ document.getElementById('suggestBtn').addEventListener('click', async () => {
       const weight = result.estimated_weight || 0.2;
       const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
-      if (type === 'Bio') bioBin += weight;
-      else nonBioBin += weight;
+      // ✅ Prevent overflow
+      if (type === 'Bio') {
+        if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
+        bioBin += weight;
+      } else {
+        if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
+        nonBioBin += weight;
+      }
 
       updateBins();
       updateAdminTable();
@@ -194,8 +206,14 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const weight = result.estimated_weight || 0.2;
     const type = result.waste_type.toLowerCase().includes('organic') ? 'Bio' : 'Non-Bio';
 
-    if (type === 'Bio') bioBin += weight;
-    else nonBioBin += weight;
+    // ✅ Prevent overflow
+    if (type === 'Bio') {
+      if (bioBin + weight > bioCapacity) return alert('🚫 Bio bin is full!');
+      bioBin += weight;
+    } else {
+      if (nonBioBin + weight > nonBioCapacity) return alert('🚫 Non-Bio bin is full!');
+      nonBioBin += weight;
+    }
 
     updateBins();
     updateAdminTable();
