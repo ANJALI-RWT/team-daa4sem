@@ -4,20 +4,68 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Collector Dashboard</title>
+
   <link rel="stylesheet" href="style.css" />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/@ericblade/quagga2/dist/quagga.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
   <style>
     #map { height: 80vh; width: 100%; margin: 20px auto; }
     .btn-pickup { background-color: green; color: white; padding: 6px 12px; border: none; margin-top: 5px; }
+    #barcodeCam { width: 300px; display: block; margin: 10px auto; }
+    #scanner-area { text-align: center; margin-bottom: 20px; }
   </style>
 </head>
+
 <body>
   <h1 style="text-align:center;">🚛 Waste Collector Dashboard</h1>
+
+  <!-- Optional barcode scanner section -->
+  <div id="scanner-area">
+    <input type="text" id="barcodeInput" placeholder="Barcode will appear here" />
+    <button id="startScanBtn">📷 Start Scan</button>
+    <video id="barcodeCam" autoplay muted></video>
+  </div>
+
   <div id="map"></div>
+
+  <!-- Barcode scanner script -->
+  <script>
+    function startBarcodeScanner() {
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#barcodeCam"),
+          constraints: {
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["ean_reader", "upc_reader", "code_128_reader"]
+        }
+      }, function (err) {
+        if (err) {
+          console.error("Quagga init error:", err);
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function (result) {
+        const code = result.codeResult.code;
+        document.getElementById("barcodeInput").value = code;
+        Quagga.stop(); // stop after first scan
+        alert("✅ Detected barcode: " + code);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("startScanBtn").addEventListener("click", startBarcodeScanner);
+    });
+  </script>
+
   <script src="collector-map.js"></script>
 </body>
 </html>
